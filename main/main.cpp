@@ -90,11 +90,11 @@ int main()
 				std::cout << desc1.mfastKeyPoints.size() << std::endl;
 			}
 
-			// for(cv::KeyPoint kp : desc1.mfastKeyPoints)
-			// {
-			// 	globalKeyPoints[gKP].mfeaturePoints.push_back(kp);
-			// }
-			// gKP++;
+			for(cv::KeyPoint kp : desc1.mfastKeyPoints)
+			{
+				globalKeyPoints[gKP].mfeaturePoints.push_back(kp);
+			}
+			gKP++;
 			
 		}
 		else if(imageCurNum == 2)
@@ -183,7 +183,7 @@ int main()
 
 		cv::imshow("img",img);
 	
-		if(cv::waitKey(33) == 27) break;	//ESC key	
+		if(cv::waitKey(0) == 27) break;	//ESC key	
 	}
 	std::cout << globalWorldPositions.size() << std::endl;
 	std::cout << globalKeyFrames.size() << std::endl;
