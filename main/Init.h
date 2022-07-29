@@ -1,20 +1,7 @@
 #pragma once
 
-#include <algorithm>
 #include <deque>
 #include <fstream>
-#include <iostream>
-#include <math.h>
-#include <string>
-
-#include "opencv2/opencv.hpp"
-#include "opencv2/videoio.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-
-using std::cerr;
-using std::cout;
-using std::endl;
 
 //Intrinsic Matrix K
 

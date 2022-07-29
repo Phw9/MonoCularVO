@@ -1,7 +1,17 @@
 // #include "KeyData.h"
 #include "../include/KeyData.h"
 
-// 3D Map Point vec
+
+mvo::HomoVec::HomoVec()
+{
+    mhomogeneousVector.clear();
+}
+mvo::HomoVec::HomoVec(const std::vector<float>& v)
+{
+    mhomogeneousVector.push_back(v);
+}
+
+
 mvo::LocalPoints::LocalPoints()
 {
     mlocalPoints.clear();
@@ -12,8 +22,6 @@ mvo::LocalPoints::LocalPoints(const cv::Point3f& pts)
 }
 
 
-// Camera Pose vec
-
 mvo::KeyFrame::KeyFrame()
 {
     mkeyframe.clear();
@@ -23,11 +31,21 @@ mvo::KeyFrame::KeyFrame(const cv::Mat& rt)
     mkeyframe.push_back(rt);
 }
 
-mvo::KeyPoint::KeyPoint()
+
+mvo::ImagePoint::ImagePoint()
 {
-    mkeyPoints.clear();
+    mimagePoints.clear();
 }
-mvo::KeyPoint::KeyPoint(const cv::Point2f& pts)
+mvo::ImagePoint::ImagePoint(const cv::Point2f& pts)
 {
-    mkeyPoints.push_back(pts);
+    mimagePoints.push_back(pts);
+}
+
+mvo::FeaturePoint::FeaturePoint()
+{
+    mfeaturePoints.clear();
+}
+mvo::FeaturePoint::FeaturePoint(const cv::KeyPoint& v)
+{
+    mfeaturePoints.push_back(v);
 }

@@ -22,5 +22,7 @@ namespace mvo
         cv::Mat mTranslation;
         cv::Mat mNormals;
     };
+    
+    cv::Point3f DotProduct3D(const cv::Mat& m, cv::Point3f v);
 }//namespace mvo
 

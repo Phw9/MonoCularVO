@@ -6,6 +6,17 @@
 
 namespace mvo
 {
+    // 4D Homogeneous vec in triangulate Calc
+    class HomoVec
+    {
+    public:
+        HomoVec();
+        HomoVec(const std::vector<float>& v);
+    public:
+        std::vector<std::vector<float>> mhomogeneousVector;
+    };
+
+
     // 3D Map Point vec
     class LocalPoints
     {
@@ -16,7 +27,7 @@ namespace mvo
         std::vector<cv::Point3f> mlocalPoints;
     };
 
-    // Camera Pose vec
+    // Camera Pose Mat
     class KeyFrame
     {
     public:
@@ -27,13 +38,22 @@ namespace mvo
     };
 
     // 2D image Point vec
-    class KeyPoint
+    class ImagePoint
     {
     public:
-        KeyPoint();
-        KeyPoint(const cv::Point2f& pts);
+        ImagePoint();
+        ImagePoint(const cv::Point2f& pts);
 
-        std::vector<cv::Point2f> mkeyPoints;
+        std::vector<cv::Point2f> mimagePoints;
+    };
+    
+    class FeaturePoint
+    {
+    public:
+        FeaturePoint();
+        FeaturePoint(const cv::KeyPoint& v);
+    public:
+        std::vector<cv::KeyPoint> mfeaturePoints;
     };
 
 }//namespace mvo

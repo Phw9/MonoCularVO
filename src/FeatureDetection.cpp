@@ -10,7 +10,7 @@ mvo::FeatureDescriptor::FeatureDescriptor()
 bool mvo::FeatureDescriptor::ConerFAST(const cv::Mat& src)
 {
     // threshold는 60이고 비최대 억제를 수행한다
-    cv::FAST(src, mfastKeyPoints, 60, true);
+    cv::FAST(src, mfastKeyPoints, 120, true);
     if (mfastKeyPoints.empty())
     {
         std::cerr << "Failed FAST detection" << std::endl;

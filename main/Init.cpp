@@ -17,7 +17,7 @@ void MakeTextFile(std::ofstream& fout, const int& imageNum)
 		fout << "./image/image_0/";
 		fout.width(6);
 		fout.fill('0');
-		fout.right;
+		// fout.right;
 		fout << i;
 		fout << ".png" << std::endl;
 	}
