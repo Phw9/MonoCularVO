@@ -14,7 +14,7 @@ namespace mvo
                             mvo::FeatureDescriptor desc2);
 
         public:
-        std::vector<mvo::HomoVec> mworldPoints;
+        std::vector<std::vector<float>> mworldPoints;
     };
 
 }

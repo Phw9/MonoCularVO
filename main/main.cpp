@@ -21,8 +21,8 @@
 
 int main()
 {
-	std::ofstream rawData ("main/image.txt", rawData.out | rawData.trunc);
-	std::ifstream read ("main/image.txt", read.in);
+	std::ofstream rawData ("../main/image.txt", rawData.out | rawData.trunc);
+	std::ifstream read ("../main/image.txt", read.in);
 	if(!read.is_open())
 	{
 		std::cerr << "file can't read image" << std::endl;
@@ -37,6 +37,7 @@ int main()
 	//Triangulate Points
 	mvo::HomoVec homoPoints4D;
 	std::vector<mvo::HomoVec> globalHomoPoints4D;
+	int gHP = 0;
 
 	mvo::FeaturePoint keyPoints;
 	std::vector<mvo::FeaturePoint> globalKeyPoints;
@@ -45,6 +46,7 @@ int main()
 	mvo::LocalPoints localPoints;
 	std::vector<mvo::LocalPoints> globalLocalPoints;
 	int gLP = 0;
+
 
 	mvo::LocalPoints featurePoints;
 	std::vector<mvo::LocalPoints> globalFeaturePoints;
@@ -55,6 +57,7 @@ int main()
 	std::vector<cv::Mat> globalKeyFrames;
 	int gKF = 0;
 
+	// Cur Position
 	cv::Point3f worldPosition;
 	std::vector<cv::Point3f> globalWorldPositions;
 	globalWorldPositions.push_back({1.0f, 1.0f, 1.0f});
@@ -147,6 +150,15 @@ int main()
 			{
 				case 1:
 				{
+					// mvo::Triangulate tri;
+					// if(!tri.CalcWorldPoints(globalKeyFrames[gKF-1], globalKeyFrames[gKF], desc2, desc1))
+					// {
+					// 	std::cerr << "Failed to calcuate Triangulate" << std::endl;
+					// }
+					// for(std::vector<float> pt : tri.mworldPoints)
+					// {
+					// 	globalHomoPoints4D[gHP].mhomogeneousVector.push_back(pt);
+					// }
 					break;
 				}
 				case 2:
@@ -171,9 +183,11 @@ int main()
 
 		cv::imshow("img",img);
 	
-		if(cv::waitKey(0) == 27) break;	//ESC key	
+		if(cv::waitKey(33) == 27) break;	//ESC key	
 	}
 	std::cout << globalWorldPositions.size() << std::endl;
+	std::cout << globalKeyFrames.size() << std::endl;
+	std::cout << globalHomoPoints4D.size() <<std::endl;
 	cv::destroyAllWindows();
 
 	return 0;
