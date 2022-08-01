@@ -23,6 +23,6 @@ namespace mvo
         cv::Mat mNormals;
     };
     
-    cv::Point3f DotProduct3D(const cv::Mat& m, cv::Point3f v);
+    cv::Vec3f DotProduct3D(const cv::Mat& m, cv::Vec4f v);
 }//namespace mvo
 

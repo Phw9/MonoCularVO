@@ -35,13 +35,17 @@ int main()
 	FileRead(readImage, read);
 
 	//Triangulate Points
-	mvo::HomoVec homoPoints4D;
-	std::vector<mvo::HomoVec> globalHomoPoints4D;
-	int gHP = 0;
+	cv::Vec4f homoPoints4D;
+	std::vector<cv::Vec4f> globalHomoPoints4D;
+	globalHomoPoints4D[0] = {1.0f, 1.0f, 1.0f, 1.0f};
+	int gHP = 1;
 
-	mvo::FeaturePoint keyPoints;
-	std::vector<mvo::FeaturePoint> globalKeyPoints;
-	int gKP = 1;
+	mvo::FeatureDescriptor desc1;
+	mvo::FeatureDescriptor desc2;
+	std::vector<mvo::FeatureDescriptor> globalDesc;
+	int gDesc = 0;
+
+	mvo::CalcMatrix calcM;
 
 	mvo::LocalPoints localPoints;
 	std::vector<mvo::LocalPoints> globalLocalPoints;
@@ -51,6 +55,8 @@ int main()
 	mvo::LocalPoints featurePoints;
 	std::vector<mvo::LocalPoints> globalFeaturePoints;
 	int gFP = 0;
+	
+	
 
 	// Pose
 	mvo::KeyFrame keyFrames;
@@ -61,12 +67,9 @@ int main()
 	cv::Point3f worldPosition;
 	std::vector<cv::Point3f> globalWorldPositions;
 	globalWorldPositions.push_back({1.0f, 1.0f, 1.0f});
-	int gWP = 0;
+	int gWP = 1;
 
-	mvo::FeatureDescriptor desc1;
-	mvo::FeatureDescriptor desc2;
 
-	mvo::CalcMatrix calcM;
 
 	while(true)
 	{
@@ -92,9 +95,9 @@ int main()
 
 			for(cv::KeyPoint kp : desc1.mfastKeyPoints)
 			{
-				globalKeyPoints[gKP].mfeaturePoints.push_back(kp);
+				globalDesc[gDesc].mfastKeyPoints.push_back(kp);
 			}
-			gKP++;
+			gDesc++;
 			
 		}
 		else if(imageCurNum == 2)
@@ -106,20 +109,22 @@ int main()
 			if(!desc2.ConerFAST(img))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
-			};
-			// for(cv::KeyPoint kp : desc2.mfastKeyPoints)
-			// {
-			// 	globalKeyPoints[gKP].mfeaturePoints.emplace_back(kp);
-			// }
-			// gKP++;
-			if(!calcM.CreateHomographyMatrix(desc1, desc2))
+			}
+			for(cv::KeyPoint kp : desc2.mfastKeyPoints)
+			{
+				globalDesc[gDesc].mfastKeyPoints.push_back(kp);
+			}
+			gDesc++;
+
+			if(!calcM.CreateEssentialMatrix(desc1, desc2, IntrinsicK))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
 			}
-			globalKeyFrames.push_back(calcM.mHomography);
+			globalKeyFrames.push_back(calcM.mEssential);
 			std::cout << globalKeyFrames.size() << std::endl;
 			std::cout << globalKeyFrames[gKF] << std::endl;
-			globalWorldPositions.push_back(mvo::DotProduct3D(globalKeyFrames[gKF++], globalWorldPositions[gWP++]));
+
+			// globalHomoPoints4D.push_back(mvo::DotProduct3D(globalKeyFrames[gKF++], globalHomoPoints4D[gHP++]));
 		}
 		else if(imageCurNum == 4)
 		{
@@ -130,19 +135,19 @@ int main()
 			{
 				std::cerr << "imageCurNum 5" << std::endl;
 			};
-			// for(cv::KeyPoint kp : desc2.mfastKeyPoints)
-			// {
-			// 	globalKeyPoints[gKP].mfeaturePoints.emplace_back(kp);
-			// }
-			// gKP++;
-			if(!calcM.CreateHomographyMatrix(desc1, desc2))
+			for(cv::KeyPoint kp : desc1.mfastKeyPoints)
+			{
+				globalDesc[gDesc].mfastKeyPoints.push_back(kp);
+			}
+			gDesc++;
+			if(!calcM.CreateEssentialMatrix(desc1, desc2, IntrinsicK))
 			{
 				std::cerr << "imageCurNum 5" << std::endl;
 			}
-			globalKeyFrames.push_back(calcM.mHomography);
+			globalKeyFrames.push_back(calcM.mEssential);
 			std::cout << globalKeyFrames.size() << std::endl;
 			std::cout << globalKeyFrames[gKF] << std::endl;
-			globalWorldPositions.push_back(mvo::DotProduct3D(globalKeyFrames[gKF++], globalWorldPositions[gWP++]));
+			// globalWorldPositions.push_back(mvo::DotProduct3D(globalKeyFrames[gKF++], globalWorldPositions[gWP++]));
 		}
 		else
 		{

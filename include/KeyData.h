@@ -11,9 +11,9 @@ namespace mvo
     {
     public:
         HomoVec();
-        HomoVec(const std::vector<float>& v);
+        HomoVec(const cv::Vec4f& v);
     public:
-        std::vector<std::vector<float>> mhomogeneousVector;
+        std::vector<cv::Vec4f> mhomogeneousVector;
     };
 
 

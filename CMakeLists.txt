@@ -32,7 +32,7 @@ target_link_libraries(MonoVO
                      ${PROJECT_SOURCE_DIR}/src/PoseEstimation.cpp
                      ${PROJECT_SOURCE_DIR}/src/Triangulation.cpp)
                      
-# add_library(./build/MonoVO STATIC
+# add_library(MonoVO STATIC
 #             ${PROJECT_SOURCE_DIR}/src/BundleAdjustment.cpp
 #             ${PROJECT_SOURCE_DIR}/src/CalcMatrix.cpp
 #             ${PROJECT_SOURCE_DIR}/src/FeatureDetection.cpp

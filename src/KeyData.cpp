@@ -6,7 +6,7 @@ mvo::HomoVec::HomoVec()
 {
     mhomogeneousVector.clear();
 }
-mvo::HomoVec::HomoVec(const std::vector<float>& v)
+mvo::HomoVec::HomoVec(const cv::Vec4f& v)
 {
     mhomogeneousVector.push_back(v);
 }

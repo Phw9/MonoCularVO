@@ -92,22 +92,24 @@ bool mvo::CalcMatrix::GetHomographyRt(const cv::InputArray& H, const cv::InputAr
     return true;
 }
 
-cv::Point3f mvo::DotProduct3D(const cv::Mat& m, cv::Point3f v)
+cv::Vec3f mvo::DotProduct3D(const cv::Mat& m, cv::Vec4f v)
 {
-    // for(int j=0; j < m.rows(); j++)
-    // {
-    //     for(int i=0; i < m.cols(); i++)
-    //     {
-    //         sum += m.at<uchar>(j,i) * v[i]
-    //     }
-    //     p[j] = sum;
-    //     sum = 0;
-    // }
-    cv::Point3f p;
-    
-	p.x += m.at<uchar>(0, 0) * v.x; p.x += m.at<uchar>(0, 1) * v.y; p.x += m.at<uchar>(0, 2) * v.z;
-    p.y += m.at<uchar>(1, 0) * v.x; p.y += m.at<uchar>(1, 1) * v.y; p.y += m.at<uchar>(1, 2) * v.z;
-    p.z += m.at<uchar>(2, 0) * v.x; p.z += m.at<uchar>(2, 1) * v.y; p.z += m.at<uchar>(2, 2) * v.z;
 
-    return p;
+    int sum = 0;
+    cv::Vec3f P;
+    for(int j=0; j < m.rows; j++)
+    {
+        for(int i=0; i < m.cols; i++)
+        {
+            sum += m.at<uchar>(j,i) * v[i];
+        }
+        P[j] = sum;
+        sum = 0;
+    }
+    for(int i=0; i<3; i++)
+    {
+        P[i] = v[i]/v[3];
+    }
+    
+    return P;
 }
