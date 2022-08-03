@@ -5,7 +5,16 @@
 #include "opencv2/core.hpp"
 
 namespace mvo
-{
+{   
+
+    // Frame data
+    class FrameData
+    {
+    public:
+        FrameData();
+    public:
+
+    };
     // 4D Homogeneous vec in triangulate Calc
     class HomoVec
     {
@@ -22,7 +31,7 @@ namespace mvo
     {
     public:
         LocalPoints();
-        LocalPoints(const cv::Point3f& pts);
+        LocalPoints(const cv::Vec3f& pts);
 
         std::vector<cv::Point3f> mlocalPoints;
     };
@@ -42,9 +51,9 @@ namespace mvo
     {
     public:
         ImagePoint();
-        ImagePoint(const cv::Point2f& pts);
+        ImagePoint(const cv::Vec2f& pts);
 
-        std::vector<cv::Point2f> mimagePoints;
+        std::vector<cv::Vec2f> mimagePoints;
     };
     
     class FeaturePoint

@@ -8,13 +8,13 @@ namespace mvo
         Triangulate();
 
         public:
-        bool CalcWorldPoints(const cv::InputArray& pose1,
-                            const cv::InputArray& pose2,
-                            mvo::FeatureDescriptor desc1,
-                            mvo::FeatureDescriptor desc2);
+        bool CalcWorldPoints(const cv::Mat& pose1,
+                            const cv::Mat& pose2,
+                            std::vector<cv::Point2f> desc1,
+                            std::vector<cv::Point2f> desc2);
 
         public:
-        std::vector<std::vector<float>> mworldPoints;
+        std::vector<cv::Vec4f> mworldPoints;
     };
 
 }

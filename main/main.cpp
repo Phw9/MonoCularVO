@@ -19,6 +19,17 @@
 // #include "gtest/gtest.h"
 
 
+float cameraX = 6.018873000000e+02;
+float cameraY = 1.831104000000e+02;
+float focalLength = 7.070912000000e+02;
+float data[] = {focalLength, 0, cameraX,
+                0, focalLength, cameraY,
+                0, 0, 1};
+
+static cv::Mat IntrinsicK(cv::Size(3, 3), CV_32FC1, data);
+
+
+
 int main()
 {
 	std::ofstream rawData ("../main/image.txt", rawData.out | rawData.trunc);
@@ -34,40 +45,34 @@ int main()
 	MakeTextFile(rawData, imageNum);
 	FileRead(readImage, read);
 
-	//Triangulate Points
-	cv::Vec4f homoPoints4D;
-	std::vector<cv::Vec4f> globalHomoPoints4D;
-	globalHomoPoints4D[0] = {1.0f, 1.0f, 1.0f, 1.0f};
-	int gHP = 1;
-
 	mvo::FeatureDescriptor desc1;
 	mvo::FeatureDescriptor desc2;
-	std::vector<mvo::FeatureDescriptor> globalDesc;
-	int gDesc = 0;
-
 	mvo::CalcMatrix calcM;
+
+	//Triangulate Points Use
+	cv::Vec4f homoPoints4D;
+	std::vector<cv::Vec4f> globalHomoPositions4D;
+	int gHP = 0;
+	globalHomoPositions4D.push_back({1,1,1,1});
+	gHP++;
 
 	mvo::LocalPoints localPoints;
 	std::vector<mvo::LocalPoints> globalLocalPoints;
-	int gLP = 0;
-
+	// int gLP = 0;
 
 	mvo::LocalPoints featurePoints;
 	std::vector<mvo::LocalPoints> globalFeaturePoints;
-	int gFP = 0;
-	
-	
+	// int gFP = 0;
 
-	// Pose
-	mvo::KeyFrame keyFrames;
-	std::vector<cv::Mat> globalKeyFrames;
-	int gKF = 0;
+	std::vector<mvo::CalcMatrix> globalPose;
+	int gP = 0;
 
 	// Cur Position
-	cv::Point3f worldPosition;
-	std::vector<cv::Point3f> globalWorldPositions;
+	cv::Vec3f worldPosition;
+	std::vector<cv::Vec3f> globalWorldPositions;
+	int gWP = 0;
 	globalWorldPositions.push_back({1.0f, 1.0f, 1.0f});
-	int gWP = 1;
+	gWP++;
 
 
 
@@ -92,12 +97,6 @@ int main()
 			{
 				std::cout << desc1.mfastKeyPoints.size() << std::endl;
 			}
-
-			for(cv::KeyPoint kp : desc1.mfastKeyPoints)
-			{
-				globalDesc[gDesc].mfastKeyPoints.push_back(kp);
-			}
-			gDesc++;
 			
 		}
 		else if(imageCurNum == 2)
@@ -109,22 +108,26 @@ int main()
 			if(!desc2.ConerFAST(img))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
-			}
-			for(cv::KeyPoint kp : desc2.mfastKeyPoints)
+			}else
 			{
-				globalDesc[gDesc].mfastKeyPoints.push_back(kp);
+				std::cout << desc2.mfastKeyPoints.size() << std::endl;
 			}
-			gDesc++;
 
 			if(!calcM.CreateEssentialMatrix(desc1, desc2, IntrinsicK))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
 			}
-			globalKeyFrames.push_back(calcM.mEssential);
-			std::cout << globalKeyFrames.size() << std::endl;
-			std::cout << globalKeyFrames[gKF] << std::endl;
+			calcM.GetEssentialRt(calcM.mEssential, IntrinsicK);
+			calcM.CombineRt();
+			
+			std::cout << calcM.mRotation << std::endl;
+			std::cout << calcM.mTranslation << std::endl;
+			std::cout << calcM.mVector1.size() << std::endl;
+			std::cout << calcM.mVector2.size() << std::endl;
+			std::cout << calcM.mCombineRt << std::endl;
+			globalPose.push_back(calcM);
+			gP++;
 
-			// globalHomoPoints4D.push_back(mvo::DotProduct3D(globalKeyFrames[gKF++], globalHomoPoints4D[gHP++]));
 		}
 		else if(imageCurNum == 4)
 		{
@@ -135,36 +138,46 @@ int main()
 			{
 				std::cerr << "imageCurNum 5" << std::endl;
 			};
-			for(cv::KeyPoint kp : desc1.mfastKeyPoints)
-			{
-				globalDesc[gDesc].mfastKeyPoints.push_back(kp);
-			}
-			gDesc++;
+			// for(cv::KeyPoint kp : desc1.mfastKeyPoints)
+			// {
+			// 	globalDesc[gDesc].mfastKeyPoints.push_back(kp);
+			// }
+			// gDesc++;
 			if(!calcM.CreateEssentialMatrix(desc1, desc2, IntrinsicK))
 			{
 				std::cerr << "imageCurNum 5" << std::endl;
 			}
-			globalKeyFrames.push_back(calcM.mEssential);
-			std::cout << globalKeyFrames.size() << std::endl;
-			std::cout << globalKeyFrames[gKF] << std::endl;
-			// globalWorldPositions.push_back(mvo::DotProduct3D(globalKeyFrames[gKF++], globalWorldPositions[gWP++]));
-		}
+			calcM.GetEssentialRt(calcM.mEssential, IntrinsicK);
+			calcM.CombineRt();
+			globalPose.push_back(calcM);
+			gP++;
+			std::cout << calcM.mRotation << std::endl;
+			std::cout << calcM.mTranslation << std::endl;
+			std::cout << calcM.mVector1.size() << std::endl;
+			std::cout << calcM.mVector2.size() << std::endl;
+			std::cout << calcM.mCombineRt << std::endl;
+			std::cout << globalPose[gP-1].mCombineRt << std::endl;
+			std::cout << globalPose[gP-1].mVector1[0][0] << std::endl;
+			std::cout << globalPose[gP-1].mVector1[0].x << std::endl;
+			std::cout << globalPose[gP-1].mVector1[0] << std::endl;
+		}	
 		else
 		{
 			switch(imageCurNum%5)
 			{
 				case 1:
 				{
-					// mvo::Triangulate tri;
-					// if(!tri.CalcWorldPoints(globalKeyFrames[gKF-1], globalKeyFrames[gKF], desc2, desc1))
-					// {
-					// 	std::cerr << "Failed to calcuate Triangulate" << std::endl;
-					// }
-					// for(std::vector<float> pt : tri.mworldPoints)
-					// {
-					// 	globalHomoPoints4D[gHP].mhomogeneousVector.push_back(pt);
-					// }
+					mvo::Triangulate tri;
+					if(!tri.CalcWorldPoints(globalPose[gP-1].mCombineRt,
+											globalPose[gP].mCombineRt,
+											globalPose[gP-1].mVector1, globalPose[gP].mVector1))
+					{
+						std::cerr << "Failed to calcuate Triangulate" << std::endl;
+					}
+					std::cout << tri.mworldPoints.size() << std::endl;
+					cv::waitKey(0);
 					break;
+					
 				}
 				case 2:
 				{
@@ -190,9 +203,9 @@ int main()
 	
 		if(cv::waitKey(0) == 27) break;	//ESC key	
 	}
-	std::cout << globalWorldPositions.size() << std::endl;
-	std::cout << globalKeyFrames.size() << std::endl;
-	std::cout << globalHomoPoints4D.size() <<std::endl;
+	std::cout << "globalWorldPositions" << globalWorldPositions.size() << std::endl;
+	std::cout << "global Pose: " << globalPose.size() <<std::endl;
+	std::cout << "globalHomoPositions4D: " << globalHomoPositions4D.size() <<std::endl;
 	cv::destroyAllWindows();
 
 	return 0;

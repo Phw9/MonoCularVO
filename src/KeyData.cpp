@@ -16,7 +16,7 @@ mvo::LocalPoints::LocalPoints()
 {
     mlocalPoints.clear();
 }
-mvo::LocalPoints::LocalPoints(const cv::Point3f& pts)
+mvo::LocalPoints::LocalPoints(const cv::Vec3f& pts)
 {
     mlocalPoints.push_back(pts);
 }
@@ -36,7 +36,7 @@ mvo::ImagePoint::ImagePoint()
 {
     mimagePoints.clear();
 }
-mvo::ImagePoint::ImagePoint(const cv::Point2f& pts)
+mvo::ImagePoint::ImagePoint(const cv::Vec2f& pts)
 {
     mimagePoints.push_back(pts);
 }
