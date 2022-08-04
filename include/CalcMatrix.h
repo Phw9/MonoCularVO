@@ -21,9 +21,10 @@ namespace mvo
         cv::Mat mHomography;
         cv::Mat mRotation;
         cv::Mat mTranslation;
-        cv::Mat mNormals;
         std::vector<cv::Point2f> mVector1;
         std::vector<cv::Point2f> mVector2;
+        cv::Mat mVecMat1;
+        cv::Mat mVecMat2;
         cv::Mat mCombineRt;
     };
     

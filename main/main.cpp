@@ -60,9 +60,8 @@ int main()
 	std::vector<mvo::LocalPoints> globalLocalPoints;
 	// int gLP = 0;
 
-	mvo::LocalPoints featurePoints;
-	std::vector<mvo::LocalPoints> globalFeaturePoints;
-	// int gFP = 0;
+	std::vector<cv::Mat> globalFeaturePoints;
+	int gFP = 0;
 
 	std::vector<mvo::CalcMatrix> globalPose;
 	int gP = 0;
@@ -119,13 +118,11 @@ int main()
 			}
 			calcM.GetEssentialRt(calcM.mEssential, IntrinsicK);
 			calcM.CombineRt();
-			
-			std::cout << calcM.mRotation << std::endl;
-			std::cout << calcM.mTranslation << std::endl;
-			std::cout << calcM.mVector1.size() << std::endl;
-			std::cout << calcM.mVector2.size() << std::endl;
-			std::cout << calcM.mCombineRt << std::endl;
-			globalPose.push_back(calcM);
+			globalPose.push_back(std::move(calcM));
+			std::cout << globalPose[gP].mRotation << std::endl;
+			std::cout << globalPose[gP].mTranslation << std::endl;
+			std::cout << globalPose[gP].mVecMat1.size() << std::endl;
+			std::cout << globalPose[gP].mVecMat2.size() << std::endl;
 			gP++;
 
 		}
@@ -149,18 +146,16 @@ int main()
 			}
 			calcM.GetEssentialRt(calcM.mEssential, IntrinsicK);
 			calcM.CombineRt();
-			globalPose.push_back(calcM);
-			gP++;
-			std::cout << calcM.mRotation << std::endl;
-			std::cout << calcM.mTranslation << std::endl;
-			std::cout << calcM.mVector1.size() << std::endl;
-			std::cout << calcM.mVector2.size() << std::endl;
-			std::cout << calcM.mCombineRt << std::endl;
+			globalPose.push_back(std::move(calcM));
+			std::cout << globalPose[gP].mRotation << std::endl;
+			std::cout << globalPose[gP].mTranslation << std::endl;
+			std::cout << globalPose[gP].mVecMat1.size() << std::endl;
+			std::cout << globalPose[gP].mVecMat2.size() << std::endl;
 			std::cout << globalPose[gP-1].mCombineRt << std::endl;
-			std::cout << globalPose[gP-1].mVector1[0][0] << std::endl;
-			std::cout << globalPose[gP-1].mVector1[0].x << std::endl;
-			std::cout << globalPose[gP-1].mVector1[0] << std::endl;
-		}	
+			std::cout << globalPose[gP].mCombineRt << std::endl;
+			gP++;
+		}
+			
 		else
 		{
 			switch(imageCurNum%5)
@@ -168,14 +163,28 @@ int main()
 				case 1:
 				{
 					mvo::Triangulate tri;
-					if(!tri.CalcWorldPoints(globalPose[gP-1].mCombineRt,
-											globalPose[gP].mCombineRt,
-											globalPose[gP-1].mVector1, globalPose[gP].mVector1))
+					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt,
+											globalPose[gP-1].mCombineRt,
+											globalPose[gP-2].mVecMat1, globalPose[gP-1].mVecMat1))
 					{
 						std::cerr << "Failed to calcuate Triangulate" << std::endl;
 					}
-					std::cout << tri.mworldPoints.size() << std::endl;
-					cv::waitKey(0);
+					// std::cout <<tri.mworldPoints.row(3) << std::endl;
+					// std::cout << tri.mworldPoints.rows << std::endl;
+					// std::cout <<tri.mworldPoints << std::endl;
+					// std::cout << tri.mworldPoints.size() << std::endl;
+
+					if(!tri.ScalingPoints())
+					{
+						std::cerr << "Failed to scale mwroldPoints" << std::endl;
+					}
+					// std::cout << tri.mworldPoints.size() << std::endl;
+					// std::cout << tri.mworldPoints.row(tri.mworldPoints.rows-1) << std::endl;
+					globalFeaturePoints.push_back(std::move(tri.mworldPoints));
+					gFP++;
+					// std::cout << globalFeaturePoints[0].size() << std::endl;
+
+
 					break;
 					
 				}
