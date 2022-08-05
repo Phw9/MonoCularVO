@@ -30,7 +30,7 @@ static cv::Mat IntrinsicK(cv::Size(3, 3), CV_32FC1, data);
 
 
 
-int main()
+int main(int argc, char** argv)
 {
 	std::ofstream rawData ("../main/image.txt", rawData.out | rawData.trunc);
 	std::ifstream read ("../main/image.txt", read.in);
@@ -40,9 +40,9 @@ int main()
 		return 0;
 	}
 	std::deque<std::string> readImage;
-	int imageNum = 921;
+	argc = 921;
 	int imageCurNum = 0 ;
-	MakeTextFile(rawData, imageNum);
+	MakeTextFile(rawData, argc);
 	FileRead(readImage, read);
 
 	mvo::FeatureDescriptor desc1;
@@ -169,18 +169,18 @@ int main()
 					{
 						std::cerr << "Failed to calcuate Triangulate" << std::endl;
 					}
-					// std::cout <<tri.mworldPoints.row(3) << std::endl;
-					// std::cout << tri.mworldPoints.rows << std::endl;
-					// std::cout <<tri.mworldPoints << std::endl;
-					// std::cout << tri.mworldPoints.size() << std::endl;
+					// std::cout <<tri.mworldMapPoints.row(3) << std::endl;
+					// std::cout << tri.mworldMapPoints.rows << std::endl;
+					// std::cout <<tri.mworldMapPoints << std::endl;
+					// std::cout << tri.mworldMapPoints.size() << std::endl;
 
 					if(!tri.ScalingPoints())
 					{
 						std::cerr << "Failed to scale mwroldPoints" << std::endl;
 					}
-					// std::cout << tri.mworldPoints.size() << std::endl;
-					// std::cout << tri.mworldPoints.row(tri.mworldPoints.rows-1) << std::endl;
-					globalFeaturePoints.push_back(std::move(tri.mworldPoints));
+					// std::cout << tri.mworldMapPoints.size() << std::endl;
+					// std::cout << tri.mworldMapPoints.row(tri.mworldMapPoints.rows-1) << std::endl;
+					globalFeaturePoints.push_back(std::move(tri.mworldMapPoints));
 					gFP++;
 					// std::cout << globalFeaturePoints[0].size() << std::endl;
 

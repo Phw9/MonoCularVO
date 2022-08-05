@@ -12,9 +12,9 @@ bool mvo::Triangulate::CalcWorldPoints(const cv::Mat& pose1,
     pts1.pop_back(abs(pts1.rows - n));
     pts2.pop_back(abs(pts2.rows - n));
     
-    cv::triangulatePoints(pose1, pose2, pts1.t(), pts2.t(), mworldPoints);
+    cv::triangulatePoints(pose1, pose2, pts1.t(), pts2.t(), mworldMapPoints);
     
-    if(mworldPoints.empty())
+    if(mworldMapPoints.empty())
     {
         std::cerr << "failed triagulatePoints" << std::endl;
         return false;
@@ -25,15 +25,15 @@ bool mvo::Triangulate::CalcWorldPoints(const cv::Mat& pose1,
 
     bool mvo::Triangulate::ScalingPoints()
     {
-        for(int i = 0; i < mworldPoints.cols; i++)
+        for(int i = 0; i < mworldMapPoints.cols; i++)
         {
-            for(int j = 0; j < mworldPoints.rows; j++)
+            for(int j = 0; j < mworldMapPoints.rows; j++)
             {
-                mworldPoints.at<float>(j,i) = mworldPoints.at<float>(j,i) / mworldPoints.at<float>(mworldPoints.rows-1,i);
+                mworldMapPoints.at<float>(j,i) = mworldMapPoints.at<float>(j,i) / mworldMapPoints.at<float>(mworldMapPoints.rows-1,i);
             }
         }
-        if(mworldPoints.at<float>(mworldPoints.rows-1,0) != 1.0f) return false;
+        if(mworldMapPoints.at<float>(mworldMapPoints.rows-1,0) != 1.0f) return false;
 
-        mworldPoints.pop_back();
+        mworldMapPoints.pop_back();
         return true;
     }

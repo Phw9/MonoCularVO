@@ -12,7 +12,6 @@ namespace mvo
         bool ScalingPoints();
 
         public:
-        cv::Mat mworldPoints = cv::Mat();
+        cv::Mat mworldMapPoints = cv::Mat();
     };
-
 }
