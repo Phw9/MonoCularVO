@@ -27,6 +27,7 @@ target_link_libraries(MonoVO ${OpenCV_LIBS})
 target_link_libraries(MonoVO 
                      ${PROJECT_SOURCE_DIR}/src/BundleAdjustment.cpp
                      ${PROJECT_SOURCE_DIR}/src/CalcMatrix.cpp
+                     ${PROJECT_SOURCE_DIR}/src/Draw.cpp
                      ${PROJECT_SOURCE_DIR}/src/FeatureDetection.cpp
                      ${PROJECT_SOURCE_DIR}/src/KeyData.cpp
                      ${PROJECT_SOURCE_DIR}/src/PoseEstimation.cpp
