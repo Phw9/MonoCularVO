@@ -120,7 +120,7 @@
 //                 std::vector<cv::Point2f> homofeatures;
 //                 for (int i = 0; i < point3d_world.rows; i++)
 //                 {
-//                     if (std::mode == 1)
+//                     if (mode == 1)
 //                     {
 //                         cv::Mat homopoint = cv::Mat::eye(1, 4, CV_64FC1);
 //                         homopoint.at<double>(0, 3) = 1.0;

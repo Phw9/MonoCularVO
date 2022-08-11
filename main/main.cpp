@@ -19,19 +19,34 @@
 // #include "gtest/gtest.h"
 
 
+
+
 float cameraX = 6.018873000000e+02;
 float cameraY = 1.831104000000e+02;
 float focalLength = 7.070912000000e+02;
 float data[] = {focalLength, 0, cameraX,
                 0, focalLength, cameraY,
-                0, 0, 1};
+                0, 0, 1};				
 
-static cv::Mat IntrinsicK(cv::Size(3, 3), CV_32FC1, data);
+static cv::Mat intrinsicK(cv::Size(3, 3), CV_32FC1, data);
+
+static const int minOfTrackPoints = 100;
 
 
 
 int main(int argc, char** argv)
 {
+	// Viewer::my_visualize pangolin_viewer=Viewer::my_visualize(window_width,window_height);
+    // pangolin_viewer.initialize();
+    // pangolin::OpenGlRenderState s_cam(
+    //     pangolin::ProjectionMatrix(window_width, window_height, ViewpointF, ViewpointF, 512, 389, 0.1, 1000),
+    //     pangolin::ModelViewLookAt(ViewpointX, ViewpointY, ViewpointZ, 0, 0, 0, 0.0, -1.0, 0.0));
+    // pangolin::View &d_cam = pangolin::CreateDisplay()
+    //                             .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -pangolin_viewer.window_ratio)
+    //                             .SetHandler(new pangolin::Handler3D(s_cam));
+
+
+
 	std::ofstream rawData ("../main/image.txt", rawData.out | rawData.trunc);
 	std::ifstream read ("../main/image.txt", read.in);
 
@@ -40,12 +55,12 @@ int main(int argc, char** argv)
 		std::cerr << "file can't read image" << std::endl;
 		return 0;
 	}
-	std::deque<std::string> readImage;
+	std::deque<std::string> readImageName;
 	int imageCurNum = 0;
 	argc = 921;
 	
 	MakeTextFile(rawData, argc);
-	FileRead(readImage, read);
+	FileRead(readImageName, read);
 
 	mvo::FeatureDetect desc1;
 	// mvo::FeatureDetect desc2;
@@ -54,36 +69,29 @@ int main(int argc, char** argv)
 	mvo::CalcMatrix calcM;
 	mvo::Triangulate tri;
 
-	//Triangulate Points Use
-	cv::Vec4f homoPoints4D;
-	std::vector<cv::Vec4f> globalHomoPositions4D;
+	//Triangulate Points
+	cv::Mat positions4D;
+	double initialData[] = {0,0,0,1};
+	std::vector<cv::Mat> global4DPositions;
 	int gHP = 0;
-	globalHomoPositions4D.push_back({1,1,1,1});
+	global4DPositions.push_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
 	gHP++;
 
 	mvo::LocalPoints localPoints;
 	std::vector<mvo::LocalPoints> globalLocalPoints;
 	// int gLP = 0;
 
-	std::vector<cv::Mat> globalFeaturePoints;
-	int gFP = 0;
+	std::vector<cv::Mat> globalMapPoints;
+	int gMP = 0;
 
 	std::vector<mvo::CalcMatrix> globalPose;
 	int gP = 0;
-
-	// Cur Position
-	cv::Vec3f worldPosition;
-	std::vector<cv::Vec3f> globalWorldPositions;
-	int gWP = 0;
-	globalWorldPositions.push_back({0, 0, 0});
-	gWP++;
-
 
 
 	while(true)
 	{
 		cv::Mat img;
-		img = cv::imread(readImage.at(imageCurNum), cv::ImreadModes::IMREAD_UNCHANGED);
+		img = cv::imread(readImageName.at(imageCurNum), cv::ImreadModes::IMREAD_UNCHANGED);
 		if (img.empty() || imageCurNum == (argc-1))
 		{
 			std::cerr << "frame upload failed" << std::endl;
@@ -98,7 +106,7 @@ int main(int argc, char** argv)
 			}
 			else
 			{
-				std::cout << desc1.mfeatures.size() << std::endl;
+				std::cout << "GFTT size : " << desc1.mfeatures.size() << std::endl;
 			}
 
 			// if(!desc1.ConerFAST(img))
@@ -120,21 +128,23 @@ int main(int argc, char** argv)
 		}
 		else if(imageCurNum == 3)
 		{
-			tracker1.OpticalFlowPyrLK(cv::imread(readImage.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, desc1.mfeatures);
-			std::cout << tracker1.mfeatures.size() << std::endl;
-			std::cout << desc1.mfeatures.size() << std::endl;
+			tracker1.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, desc1.mfeatures);
+			std::cout <<"after tracked size: "<< tracker1.mfeatures.size() << std::endl;
+			std::cout <<"after tracking size: "<< desc1.mfeatures.size() << std::endl;
 
-			if(!calcM.CreateEssentialMatrix(desc1.mfeatures, tracker1.mfeatures, IntrinsicK))
+			if(!calcM.CreateEssentialMatrix(desc1.mfeatures, tracker1.mfeatures, intrinsicK))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
 			}
-			calcM.GetEssentialRt(calcM.mEssential, IntrinsicK, desc1.mfeatures, tracker1.mfeatures);
+			calcM.GetEssentialRt(calcM.mEssential, intrinsicK, desc1.mfeatures, tracker1.mfeatures);
 			calcM.CombineRt();
 			globalPose.push_back(std::move(calcM));
-			std::cout << globalPose[gP].mRotation << std::endl;
-			std::cout << globalPose[gP].mTranslation << std::endl;
 			gP++;
-
+			std::cout << globalPose[gP-1].mCombineRt << std::endl;
+			
+			positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+			global4DPositions.push_back(std::move(positions4D));
+			gHP++;
 			// if(!desc2.ConerFAST(img))
 			// {
 			// 	std::cerr << "imageCurNum 3" << std::endl;
@@ -143,11 +153,11 @@ int main(int argc, char** argv)
 			// 	std::cout << desc2.mfastKeyPoints.size() << std::endl;
 			// }
 
-			// if(!calcM.CreateEssentialMatrix(desc1, desc2, IntrinsicK))
+			// if(!calcM.CreateEssentialMatrix(desc1, desc2, intrinsicK))
 			// {
 			// 	std::cerr << "imageCurNum 3" << std::endl;
 			// }
-			// calcM.GetEssentialRt(calcM.mEssential, IntrinsicK);
+			// calcM.GetEssentialRt(calcM.mEssential, intrinsicK);
 			// calcM.CombineRt();
 			// globalPose.push_back(std::move(calcM));
 			// std::cout << globalPose[gP].mRotation << std::endl;
@@ -165,19 +175,22 @@ int main(int argc, char** argv)
 		else if(imageCurNum == 5)
 		{
 
-			tracker2.OpticalFlowPyrLK(cv::imread(readImage.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker1.mfeatures);
-			std::cout << tracker2.mfeatures.size() << std::endl;
-			std::cout << tracker1.mfeatures.size() << std::endl;
-			if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, IntrinsicK))
+			tracker2.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker1.mfeatures);
+			std::cout << "after tracked size: "<<tracker2.mfeatures.size() << std::endl;
+			std::cout << "after tracking size: "<<tracker1.mfeatures.size() << std::endl;
+			if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, intrinsicK))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
 			}
-			calcM.GetEssentialRt(calcM.mEssential, IntrinsicK, tracker1.mfeatures, tracker2.mfeatures);
+			calcM.GetEssentialRt(calcM.mEssential, intrinsicK, tracker1.mfeatures, tracker2.mfeatures);
 			calcM.CombineRt();
 			globalPose.push_back(std::move(calcM));
-			std::cout << globalPose[gP].mRotation << std::endl;
-			std::cout << globalPose[gP].mTranslation << std::endl;
 			gP++;
+			std::cout << globalPose[gP-1].mCombineRt << std::endl;
+			
+			positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+			global4DPositions.push_back(std::move(positions4D));
+			gHP++;
 
 			// if(!desc1.ConerFAST(img))
 			// {
@@ -187,11 +200,11 @@ int main(int argc, char** argv)
 			// 	std::cout << desc1.mfastKeyPoints.size() << std::endl;
 			// }
 
-			// if(!calcM.CreateEssentialMatrix(desc1, desc2, IntrinsicK))
+			// if(!calcM.CreateEssentialMatrix(desc1, desc2, intrinsicK))
 			// {
 			// 	std::cerr << "imageCurNum 5" << std::endl;
 			// }
-			// calcM.GetEssentialRt(calcM.mEssential, IntrinsicK);
+			// calcM.GetEssentialRt(calcM.mEssential, intrinsicK);
 			// calcM.CombineRt();
 			// globalPose.push_back(std::move(calcM));
 			// std::cout << globalPose[gP].mRotation << std::endl;
@@ -211,33 +224,36 @@ int main(int argc, char** argv)
 			{
 				case 1:
 				{
-					tracker1.OpticalFlowPyrLK(cv::imread(readImage.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker2.mfeatures);
-					std::cout << tracker2.mfeatures.size() << std::endl;
-					std::cout << tracker1.mfeatures.size() << std::endl;
-					if(!calcM.CreateEssentialMatrix(tracker2.mfeatures, tracker1.mfeatures, IntrinsicK))
+					tracker1.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker2.mfeatures);
+					std::cout <<"after tracked size: "<< tracker2.mfeatures.size() << std::endl;
+					std::cout <<"after tracking size: "<< tracker1.mfeatures.size() << std::endl;
+					if(!calcM.CreateEssentialMatrix(tracker2.mfeatures, tracker1.mfeatures, intrinsicK))
 					{
 						std::cerr << "imageCurNum 3" << std::endl;
 					}
-					calcM.GetEssentialRt(calcM.mEssential, IntrinsicK, tracker2.mfeatures, tracker1.mfeatures);
+					calcM.GetEssentialRt(calcM.mEssential, intrinsicK, tracker2.mfeatures, tracker1.mfeatures);
 					calcM.CombineRt();
 					globalPose.push_back(std::move(calcM));
-					std::cout << globalPose[gP].mRotation << std::endl;
-					std::cout << globalPose[gP].mTranslation << std::endl;
 					gP++;
+					std::cout << globalPose[gP-1].mCombineRt << std::endl;
+					
+					positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+					global4DPositions.push_back(std::move(positions4D));
+					gHP++;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker2.mfeatures, tracker1.mfeatures))
 					{
 						std::cerr << "failed to calculate triangulatePoints" << std::endl;
 					}
+					std::cout << "after triangulate Point size: " <<tri.mworldMapPoints.size() << std::endl;
 					if(!tri.ScalingPoints())
 					{
 						std::cerr << "failed to Scale Points" << std::endl;
 					}
-					globalFeaturePoints[gFP] = tri.mworldMapPoints;
-					gFP++;
-
-					std::cout << globalFeaturePoints[gFP-1].size() << std::endl;
-
+					globalMapPoints.push_back(std::move(tri.mworldMapPoints));
+					gMP++;
+					std::cout << "check to insert global size: " << globalMapPoints.size() << std::endl;
+					std::cout << "check to insert local size: " << globalMapPoints[gMP-1].size() << std::endl;
 
 					// mvo::Triangulate tri;
 					// if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt,
@@ -257,9 +273,9 @@ int main(int argc, char** argv)
 					// }
 					// // std::cout << tri.mworldMapPoints.size() << std::endl;
 					// // std::cout << tri.mworldMapPoints.row(tri.mworldMapPoints.rows-1) << std::endl;
-					// globalFeaturePoints.push_back(std::move(tri.mworldMapPoints));
-					// gFP++;
-					// // std::cout << globalFeaturePoints[0].size() << std::endl;
+					// globalMapPoints.push_back(std::move(tri.mworldMapPoints));
+					// gMP++;
+					// // std::cout << globalMapPoints[0].size() << std::endl;
 
 
 					break;
@@ -267,23 +283,39 @@ int main(int argc, char** argv)
 				}
 				case 2:
 				{
+					if(tracker1.mfeatures.size() < minOfTrackPoints)
+					{
+						if(!desc1.GoodFeatureToTrack(img))
+						{
+							std::cerr << "imageCurNum " << imageCurNum << std::endl;
+						}
+						else
+						{
+							tracker1.mfeatures = std::move(desc1.mfeatures);
+							std::cout << "new GFTT size: " << desc1.mfeatures.size() << std::endl;
+							std::cout << "move to new GFTT size: " << tracker1.mfeatures.size() << std::endl;
+						}
+					}
 					break;
 				}
 				case 3:
 				{
-					tracker2.OpticalFlowPyrLK(cv::imread(readImage.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker1.mfeatures);
-					std::cout << tracker1.mfeatures.size() << std::endl;
-					std::cout << tracker2.mfeatures.size() << std::endl;
-					if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, IntrinsicK))
+					tracker2.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker1.mfeatures);
+					std::cout << "after tracked size: " << tracker1.mfeatures.size() << std::endl;
+					std::cout << "after tracking size: " << tracker2.mfeatures.size() << std::endl;
+					if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, intrinsicK))
 					{
 						std::cerr << "imageCurNum 3" << std::endl;
 					}
-					calcM.GetEssentialRt(calcM.mEssential, IntrinsicK, tracker1.mfeatures, tracker1.mfeatures);
+					calcM.GetEssentialRt(calcM.mEssential, intrinsicK, tracker1.mfeatures, tracker1.mfeatures);
 					calcM.CombineRt();
 					globalPose.push_back(std::move(calcM));
-					std::cout << globalPose[gP].mRotation << std::endl;
-					std::cout << globalPose[gP].mTranslation << std::endl;
 					gP++;
+					std::cout << globalPose[gP-1].mCombineRt << std::endl;
+
+					positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+					global4DPositions.push_back(std::move(positions4D));
+					gHP++;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker1.mfeatures, tracker2.mfeatures))
 					{
@@ -293,15 +325,18 @@ int main(int argc, char** argv)
 					{
 						std::cerr << "failed to Scale Points" << std::endl;
 					}
-					globalFeaturePoints[gFP] = tri.mworldMapPoints;
-					gFP++;
+					globalMapPoints.push_back(std::move(tri.mworldMapPoints));
+					gMP++;
+					std::cout << "check to insert global size: " << globalMapPoints.size() << std::endl;
+					std::cout << "check to insert local size: " << globalMapPoints[gMP-1].size() << std::endl;
 
-					std::cout << globalFeaturePoints[gFP-1].size() << std::endl;
+
 					break;
+
 				}
 				case 4:
 				{
-					if(tracker2.mfeatures.size() < 100)
+					if(tracker2.mfeatures.size() < minOfTrackPoints)
 					{
 						if(!desc1.GoodFeatureToTrack(img))
 						{
@@ -310,8 +345,8 @@ int main(int argc, char** argv)
 						else
 						{
 							tracker2.mfeatures = std::move(desc1.mfeatures);
-							std::cout << desc1.mfeatures.size() << std::endl;
-							std::cout << tracker2.mfeatures.size() << std::endl;
+							std::cout << "new GFTT size: " << desc1.mfeatures.size() << std::endl;
+							std::cout << "move to new GFTT size: " << tracker2.mfeatures.size() << std::endl;
 						}
 					}
 					break;
@@ -328,9 +363,9 @@ int main(int argc, char** argv)
 	
 		if(cv::waitKey(0) == 27) break;	//ESC key	
 	}
-	std::cout << "globalWorldPositions" << globalWorldPositions.size() << std::endl;
-	std::cout << "global Pose: " << globalPose.size() <<std::endl;
-	std::cout << "globalHomoPositions4D: " << globalHomoPositions4D.size() <<std::endl;
+	std::cout << "globalMapPoints size: " << globalMapPoints.size() << std::endl;
+	std::cout << "globalPose size: " << globalPose.size() <<std::endl;
+	std::cout << "global4DPositions size: " << global4DPositions.size() <<std::endl;
 	cv::destroyAllWindows();
 
 	return 0;

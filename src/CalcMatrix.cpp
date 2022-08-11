@@ -53,6 +53,12 @@ bool mvo::CalcMatrix::CombineRt()
     }
     return true;
 }
+cv::Mat mvo::GetPosePosition(const cv::Mat& rt, const cv::Mat& pos)
+{
+    cv::Mat temp = rt * pos;
+    temp.push_back((double)1);
+    return temp;
+}
 
 
 // Essential 행렬과 Essential 행렬을 만들 때 사용했던 Intrinsic Matrix K 를 넣으면 된다.

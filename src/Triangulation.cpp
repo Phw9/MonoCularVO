@@ -29,7 +29,6 @@ bool mvo::Triangulate::ScalingPoints()
     }
     if(mworldMapPoints.at<float>(mworldMapPoints.rows-1,0) != 1.0f) return false;
 
-    mworldMapPoints.pop_back();
     return true;
 }
 // bool mvo::Triangulate::CalcWorldPoints(const cv::Mat& pose1,

@@ -29,5 +29,6 @@ namespace mvo
         cv::Mat mVecMat2;
         cv::Mat mCombineRt;
     };
+    cv::Mat GetPosePosition(const cv::Mat& rt, const cv::Mat& pos);
 }//namespace mvo
 

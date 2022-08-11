@@ -56,7 +56,7 @@ bool mvo::FeatureTracking::OpticalFlowPyrLK(const cv::Mat& src1, const cv::Mat& 
             {
                 mstatus.at(i) = 0;
             }
-            pts1.erase(pts1.begin() + (i - indexCorrection));
+            pts1.erase(pts1.begin() + (i - indexCorrection));           // time complexity
             mfeatures.erase(mfeatures.begin() + (i - indexCorrection));
             indexCorrection++;
         }
