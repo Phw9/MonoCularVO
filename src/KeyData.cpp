@@ -8,7 +8,7 @@ mvo::HomoVec::HomoVec()
 }
 mvo::HomoVec::HomoVec(const cv::Vec4f& v)
 {
-    mhomogeneousVector.push_back(v);
+    mhomogeneousVector.emplace_back(v);
 }
 
 
@@ -18,7 +18,7 @@ mvo::LocalPoints::LocalPoints()
 }
 mvo::LocalPoints::LocalPoints(const cv::Vec3f& pts)
 {
-    mlocalPoints.push_back(pts);
+    mlocalPoints.emplace_back(pts);
 }
 
 
@@ -28,7 +28,7 @@ mvo::KeyFrame::KeyFrame()
 }
 mvo::KeyFrame::KeyFrame(const cv::Mat& rt)
 {
-    mkeyframe.push_back(rt);
+    mkeyframe.emplace_back(rt);
 }
 
 
@@ -38,7 +38,7 @@ mvo::ImagePoint::ImagePoint()
 }
 mvo::ImagePoint::ImagePoint(const cv::Vec2f& pts)
 {
-    mimagePoints.push_back(pts);
+    mimagePoints.emplace_back(pts);
 }
 
 mvo::FeaturePoint::FeaturePoint()
@@ -47,5 +47,5 @@ mvo::FeaturePoint::FeaturePoint()
 }
 mvo::FeaturePoint::FeaturePoint(const cv::KeyPoint& v)
 {
-    mfeaturePoints.push_back(v);
+    mfeaturePoints.emplace_back(v);
 }

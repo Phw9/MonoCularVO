@@ -7,7 +7,7 @@ void FileRead(std::deque<std::string>& v, std::ifstream &fin)
 	{
 		getline(fin, line);
 		if(fin.eof()) break;
-		v.push_back(line);
+		v.emplace_back(line);
 	}
 }
 void MakeTextFile(std::ofstream& fout, const int& imageNum)

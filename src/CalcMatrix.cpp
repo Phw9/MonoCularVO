@@ -86,18 +86,18 @@ cv::Mat mvo::GetPosePosition(const cv::Mat& rt, const cv::Mat& pos)
 //     for (cv::KeyPoint kp : desc1.mfastKeyPoints)
 //     {
 //         // cv::Point2f pt(cvRound(kp.pt.x), cvRound(kp.pt.y));
-//         // mVector1.push_back(pt);
+//         // mVector1.emplace_back(pt);
 //         float data[] = {(float)cvRound(kp.pt.x), (float)cvRound(kp.pt.y)};
 //         cv::Mat temp = cv::Mat(cv::Size(2,1),CV_32FC1, data);
-//         mVecMat1.push_back(temp);
+//         mVecMat1.emplace_back(temp);
 //     }
 //     for (cv::KeyPoint kp : desc2.mfastKeyPoints)
 //     {
 //         // cv::Point2f pt(cvRound(kp.pt.x), cvRound(kp.pt.y));
-//         // mVector2.push_back(pt);
+//         // mVector2.emplace_back(pt);
 //         float data[] = {(float)cvRound(kp.pt.x), (float)cvRound(kp.pt.y)};
 //         cv::Mat temp = cv::Mat(cv::Size(2,1),CV_32FC1, data);
-//         mVecMat2.push_back(temp);
+//         mVecMat2.emplace_back(temp);
 //     }
 
 //     mEssential = cv::findEssentialMat(mVecMat1, mVecMat2, K, cv::RANSAC, 0.999, 1.0, cv::noArray());
@@ -121,13 +121,13 @@ cv::Mat mvo::GetPosePosition(const cv::Mat& rt, const cv::Mat& pos)
 //     {
 //         float data[] = {(float)cvRound(kp.pt.x), (float)cvRound(kp.pt.y)};
 //         cv::Mat temp = cv::Mat(cv::Size(2,1),CV_32FC1, data);
-//         mVecMat1.push_back(temp);
+//         mVecMat1.emplace_back(temp);
 //     }
 //     for (cv::KeyPoint kp : desc2.mfastKeyPoints)
 //     {
 //         float data[] = {(float)cvRound(kp.pt.x), (float)cvRound(kp.pt.y)};
 //         cv::Mat temp = cv::Mat(cv::Size(2,1),CV_32FC1, data);
-//         mVecMat2.push_back(temp);
+//         mVecMat2.emplace_back(temp);
 //     }
 
 //     mHomography = cv::findHomography(mVecMat1, mVecMat2, cv::RANSAC, 3.0, cv::noArray(), 2000, 0.995);

@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 	double initialData[] = {0,0,0,1};
 	std::vector<cv::Mat> global4DPositions;
 	int gHP = 0;
-	global4DPositions.push_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
+	global4DPositions.emplace_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
 	gHP++;
 
 	mvo::LocalPoints localPoints;
@@ -138,12 +138,12 @@ int main(int argc, char** argv)
 			}
 			calcM.GetEssentialRt(calcM.mEssential, intrinsicK, desc1.mfeatures, tracker1.mfeatures);
 			calcM.CombineRt();
-			globalPose.push_back(std::move(calcM));
+			globalPose.emplace_back(std::move(calcM));
 			gP++;
 			std::cout << globalPose[gP-1].mCombineRt << std::endl;
 			
 			positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-			global4DPositions.push_back(std::move(positions4D));
+			global4DPositions.emplace_back(std::move(positions4D));
 			gHP++;
 			// if(!desc2.ConerFAST(img))
 			// {
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 			// }
 			// calcM.GetEssentialRt(calcM.mEssential, intrinsicK);
 			// calcM.CombineRt();
-			// globalPose.push_back(std::move(calcM));
+			// globalPose.emplace_back(std::move(calcM));
 			// std::cout << globalPose[gP].mRotation << std::endl;
 			// std::cout << globalPose[gP].mTranslation << std::endl;
 			// std::cout << globalPose[gP].mVecMat1.size() << std::endl;
@@ -184,12 +184,12 @@ int main(int argc, char** argv)
 			}
 			calcM.GetEssentialRt(calcM.mEssential, intrinsicK, tracker1.mfeatures, tracker2.mfeatures);
 			calcM.CombineRt();
-			globalPose.push_back(std::move(calcM));
+			globalPose.emplace_back(std::move(calcM));
 			gP++;
 			std::cout << globalPose[gP-1].mCombineRt << std::endl;
 			
 			positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-			global4DPositions.push_back(std::move(positions4D));
+			global4DPositions.emplace_back(std::move(positions4D));
 			gHP++;
 
 			// if(!desc1.ConerFAST(img))
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 			// }
 			// calcM.GetEssentialRt(calcM.mEssential, intrinsicK);
 			// calcM.CombineRt();
-			// globalPose.push_back(std::move(calcM));
+			// globalPose.emplace_back(std::move(calcM));
 			// std::cout << globalPose[gP].mRotation << std::endl;
 			// std::cout << globalPose[gP].mTranslation << std::endl;
 			// std::cout << globalPose[gP].mVecMat1.size() << std::endl;
@@ -233,12 +233,12 @@ int main(int argc, char** argv)
 					}
 					calcM.GetEssentialRt(calcM.mEssential, intrinsicK, tracker2.mfeatures, tracker1.mfeatures);
 					calcM.CombineRt();
-					globalPose.push_back(std::move(calcM));
+					globalPose.emplace_back(std::move(calcM));
 					gP++;
 					std::cout << globalPose[gP-1].mCombineRt << std::endl;
 					
 					positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-					global4DPositions.push_back(std::move(positions4D));
+					global4DPositions.emplace_back(std::move(positions4D));
 					gHP++;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker2.mfeatures, tracker1.mfeatures))
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
 					{
 						std::cerr << "failed to Scale Points" << std::endl;
 					}
-					globalMapPoints.push_back(std::move(tri.mworldMapPoints));
+					globalMapPoints.emplace_back(std::move(tri.mworldMapPoints));
 					gMP++;
 					std::cout << "check to insert global size: " << globalMapPoints.size() << std::endl;
 					std::cout << "check to insert local size: " << globalMapPoints[gMP-1].size() << std::endl;
@@ -273,7 +273,7 @@ int main(int argc, char** argv)
 					// }
 					// // std::cout << tri.mworldMapPoints.size() << std::endl;
 					// // std::cout << tri.mworldMapPoints.row(tri.mworldMapPoints.rows-1) << std::endl;
-					// globalMapPoints.push_back(std::move(tri.mworldMapPoints));
+					// globalMapPoints.emplace_back(std::move(tri.mworldMapPoints));
 					// gMP++;
 					// // std::cout << globalMapPoints[0].size() << std::endl;
 
@@ -309,12 +309,12 @@ int main(int argc, char** argv)
 					}
 					calcM.GetEssentialRt(calcM.mEssential, intrinsicK, tracker1.mfeatures, tracker1.mfeatures);
 					calcM.CombineRt();
-					globalPose.push_back(std::move(calcM));
+					globalPose.emplace_back(std::move(calcM));
 					gP++;
 					std::cout << globalPose[gP-1].mCombineRt << std::endl;
 
 					positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-					global4DPositions.push_back(std::move(positions4D));
+					global4DPositions.emplace_back(std::move(positions4D));
 					gHP++;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker1.mfeatures, tracker2.mfeatures))
@@ -325,7 +325,7 @@ int main(int argc, char** argv)
 					{
 						std::cerr << "failed to Scale Points" << std::endl;
 					}
-					globalMapPoints.push_back(std::move(tri.mworldMapPoints));
+					globalMapPoints.emplace_back(std::move(tri.mworldMapPoints));
 					gMP++;
 					std::cout << "check to insert global size: " << globalMapPoints.size() << std::endl;
 					std::cout << "check to insert local size: " << globalMapPoints[gMP-1].size() << std::endl;
