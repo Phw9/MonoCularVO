@@ -18,8 +18,12 @@
 #include "opencv2/highgui.hpp"
 // #include "gtest/gtest.h"
 
-
-
+#define WINDOWWIDTH 1024
+#define WINDOWHEIGHT 768
+#define VIEWPOINTF 2000.0
+#define VIEWPOINTX 0.0
+#define VIEWPOINTY -10.0
+#define VIEWPOINTZ -0.1
 
 float cameraX = 6.018873000000e+02;
 float cameraY = 1.831104000000e+02;
@@ -35,18 +39,7 @@ static const int minOfTrackPoints = 100;
 
 
 int main(int argc, char** argv)
-{
-	// Viewer::my_visualize pangolin_viewer=Viewer::my_visualize(window_width,window_height);
-    // pangolin_viewer.initialize();
-    // pangolin::OpenGlRenderState s_cam(
-    //     pangolin::ProjectionMatrix(window_width, window_height, ViewpointF, ViewpointF, 512, 389, 0.1, 1000),
-    //     pangolin::ModelViewLookAt(ViewpointX, ViewpointY, ViewpointZ, 0, 0, 0, 0.0, -1.0, 0.0));
-    // pangolin::View &d_cam = pangolin::CreateDisplay()
-    //                             .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -pangolin_viewer.window_ratio)
-    //                             .SetHandler(new pangolin::Handler3D(s_cam));
-
-
-
+{ 
 	std::ofstream rawData ("../main/image.txt", rawData.out | rawData.trunc);
 	std::ifstream read ("../main/image.txt", read.in);
 
@@ -87,6 +80,14 @@ int main(int argc, char** argv)
 	std::vector<mvo::CalcMatrix> globalPose;
 	int gP = 0;
 
+	Viewer::my_visualize pangolinViewer=Viewer::my_visualize(WINDOWWIDTH, WINDOWHEIGHT);
+    pangolinViewer.initialize();
+    pangolin::OpenGlRenderState s_cam(
+    pangolin::ProjectionMatrix(WINDOWWIDTH, WINDOWHEIGHT, VIEWPOINTF, VIEWPOINTF, 512, 389, 0.1, 1000),
+    pangolin::ModelViewLookAt(VIEWPOINTX, VIEWPOINTY, VIEWPOINTZ, 0, 0, 0, 0.0, -1.0, 0.0));
+    pangolin::View &d_cam = pangolin::CreateDisplay()
+                                .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -pangolinViewer.window_ratio)
+                                .SetHandler(new pangolin::Handler3D(s_cam));
 
 	while(true)
 	{
@@ -119,7 +120,7 @@ int main(int argc, char** argv)
 			// }
 
 			// GFTT
-			
+			img = pangolinViewer.cv_draw_features(img, desc1.mfeatures, desc1.mfeatures);
 			
 		}
 		else if(imageCurNum == 2)
@@ -131,6 +132,8 @@ int main(int argc, char** argv)
 			tracker1.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, desc1.mfeatures);
 			std::cout <<"after tracked size: "<< tracker1.mfeatures.size() << std::endl;
 			std::cout <<"after tracking size: "<< desc1.mfeatures.size() << std::endl;
+			
+			img = pangolinViewer.cv_draw_features(img,tracker1.mfeatures, desc1.mfeatures);
 
 			if(!calcM.CreateEssentialMatrix(desc1.mfeatures, tracker1.mfeatures, intrinsicK))
 			{
@@ -178,6 +181,9 @@ int main(int argc, char** argv)
 			tracker2.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker1.mfeatures);
 			std::cout << "after tracked size: "<<tracker2.mfeatures.size() << std::endl;
 			std::cout << "after tracking size: "<<tracker1.mfeatures.size() << std::endl;
+			
+			img = pangolinViewer.cv_draw_features(img,tracker2.mfeatures, tracker1.mfeatures);
+			
 			if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, intrinsicK))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
@@ -227,6 +233,9 @@ int main(int argc, char** argv)
 					tracker1.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker2.mfeatures);
 					std::cout <<"after tracked size: "<< tracker2.mfeatures.size() << std::endl;
 					std::cout <<"after tracking size: "<< tracker1.mfeatures.size() << std::endl;
+					
+					img = pangolinViewer.cv_draw_features(img,tracker2.mfeatures, tracker1.mfeatures);
+					
 					if(!calcM.CreateEssentialMatrix(tracker2.mfeatures, tracker1.mfeatures, intrinsicK))
 					{
 						std::cerr << "imageCurNum 3" << std::endl;
@@ -303,6 +312,9 @@ int main(int argc, char** argv)
 					tracker2.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker1.mfeatures);
 					std::cout << "after tracked size: " << tracker1.mfeatures.size() << std::endl;
 					std::cout << "after tracking size: " << tracker2.mfeatures.size() << std::endl;
+					
+					img = pangolinViewer.cv_draw_features(img,tracker1.mfeatures, tracker2.mfeatures);
+					
 					if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, intrinsicK))
 					{
 						std::cerr << "imageCurNum 3" << std::endl;
@@ -363,6 +375,12 @@ int main(int argc, char** argv)
 	
 		if(cv::waitKey(0) == 27) break;	//ESC key	
 	}
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    d_cam.Activate(s_cam);
+    // std::vector<cv::Point3d> hello=land_mark.Getvector();
+    // pangolinViewer.draw_point(Pango_REpose, Pango_GTpose, hello, Pango_Map);
+    // pangolin::FinishFrame();
+
 	std::cout << "globalMapPoints size: " << globalMapPoints.size() << std::endl;
 	std::cout << "globalPose size: " << globalPose.size() <<std::endl;
 	std::cout << "global4DPositions size: " << global4DPositions.size() <<std::endl;

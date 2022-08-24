@@ -43,7 +43,7 @@ bool mvo::FeatureTracking::OpticalFlowPyrLK(const cv::Mat& src1, const cv::Mat& 
 {
     cv::Size winSize = cv::Size(21,21);
     cv::TermCriteria termcrit = cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01);
-
+    
     cv::calcOpticalFlowPyrLK(src1, src2, pts1, mfeatures, mstatus, merr, winSize, 3, termcrit, 0, 0.0001);
 
     int indexCorrection = 0;
