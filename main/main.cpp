@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 { 
 	std::ofstream rawData ("../main/image.txt", rawData.out | rawData.trunc);
 	std::ifstream read ("../main/image.txt", read.in);
-	std::ifstream gtPose ("../main/GTpose.txt", gtPose.in);
+	std::ifstream gtPose ("../image/GTpose.txt", gtPose.in);
 	
 	std::vector<cv::Mat> GTPose;
 
@@ -398,7 +398,7 @@ int main(int argc, char** argv)
 
 		cv::imshow("img",img);
 	
-		if(cv::waitKey(0) == 27) break;	//ESC key	
+		if(cv::waitKey(100) == 27) break;	//ESC key	
 	}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     d_cam.Activate(s_cam);
@@ -412,4 +412,3 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-
