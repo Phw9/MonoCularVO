@@ -120,6 +120,7 @@ int main(int argc, char** argv)
 			// }
 
 			// GFTT
+			cv::cvtColor(img, img, cv::ColorConversionCodes::COLOR_GRAY2BGR);
 			img = pangolinViewer.cv_draw_features(img, desc1.mfeatures, desc1.mfeatures);
 			
 		}
@@ -133,6 +134,7 @@ int main(int argc, char** argv)
 			std::cout <<"after tracked size: "<< tracker1.mfeatures.size() << std::endl;
 			std::cout <<"after tracking size: "<< desc1.mfeatures.size() << std::endl;
 			
+			cv::cvtColor(img, img, cv::ColorConversionCodes::COLOR_GRAY2BGR);
 			img = pangolinViewer.cv_draw_features(img,tracker1.mfeatures, desc1.mfeatures);
 
 			if(!calcM.CreateEssentialMatrix(desc1.mfeatures, tracker1.mfeatures, intrinsicK))
@@ -182,6 +184,7 @@ int main(int argc, char** argv)
 			std::cout << "after tracked size: "<<tracker2.mfeatures.size() << std::endl;
 			std::cout << "after tracking size: "<<tracker1.mfeatures.size() << std::endl;
 			
+			cv::cvtColor(img, img, cv::ColorConversionCodes::COLOR_GRAY2BGR);
 			img = pangolinViewer.cv_draw_features(img,tracker2.mfeatures, tracker1.mfeatures);
 			
 			if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, intrinsicK))
@@ -234,6 +237,7 @@ int main(int argc, char** argv)
 					std::cout <<"after tracked size: "<< tracker2.mfeatures.size() << std::endl;
 					std::cout <<"after tracking size: "<< tracker1.mfeatures.size() << std::endl;
 					
+					cv::cvtColor(img, img, cv::ColorConversionCodes::COLOR_GRAY2BGR);
 					img = pangolinViewer.cv_draw_features(img,tracker2.mfeatures, tracker1.mfeatures);
 					
 					if(!calcM.CreateEssentialMatrix(tracker2.mfeatures, tracker1.mfeatures, intrinsicK))
@@ -313,6 +317,7 @@ int main(int argc, char** argv)
 					std::cout << "after tracked size: " << tracker1.mfeatures.size() << std::endl;
 					std::cout << "after tracking size: " << tracker2.mfeatures.size() << std::endl;
 					
+					cv::cvtColor(img, img, cv::ColorConversionCodes::COLOR_GRAY2BGR);
 					img = pangolinViewer.cv_draw_features(img,tracker1.mfeatures, tracker2.mfeatures);
 					
 					if(!calcM.CreateEssentialMatrix(tracker1.mfeatures, tracker2.mfeatures, intrinsicK))
