@@ -20,13 +20,12 @@
 
 #include <stdio.h>
 #include <iostream>
-#include <fstream>
 
 
 
 void FileRead(std::deque<std::string>& v, std::ifstream &fin);
 void MakeTextFile(std::ofstream& fout, const int& imageNum);
-void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin);
+void GTPoseRead(std::vector<cv::Mat>& m, std::ifstream& fin);
 
 /*
     pangolin :: visualioze GT,RE Trajectory 
@@ -76,10 +75,10 @@ void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin);
 //             }
 
 //             // pts1, pts2, pts3, pts4
-//             void draw_point(std::vector<cv::Point3f>& points1, std::vector<cv::Point3f>& points2, std::vector<cv::Point3d>& points3, cv::Mat points4)
+//             void draw_point(std::vector<cv::Point3f>& gtPose, std::vector<cv::Point3f>& pose, std::vector<cv::Point3d>& allOfPoints, cv::Mat fovPoints)
 // 			{
 //                 glClearColor(1.0f,1.0f,1.0f,1.0f);
-//                 if(points1.size()==0 || points2.size()==0)
+//                 if(gtPose.size()==0 || pose.size()==0)
 // 				{
 //                     return;
 //                 }
@@ -89,9 +88,9 @@ void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin);
 //                     glBegin(GL_POINTS);
 //                     glColor3f(1.0,0.0,0.0);
 
-//                     for(int i=0;i<points1.size();i++)
+//                     for(int i=0;i<gtPose.size();i++)
 // 					{
-//                         glVertex3f((float)points1[i].x,0,(float)points1[i].z);
+//                         glVertex3f((float)gtPose[i].x,0,(float)gtPose[i].z);
 //                     }
 //                     glEnd();
 
@@ -99,9 +98,9 @@ void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin);
 //                     glBegin(GL_POINTS);
 //                     glColor3f(0.0,0.0,1.0);
 
-//                     for(int i=0;i<points2.size();i++)
+//                     for(int i=0;i<pose.size();i++)
 // 					{
-//                         glVertex3f((float)points2[i].x,0,(float)points2[i].z);
+//                         glVertex3f((float)pose[i].x,0,(float)pose[i].z);
 //                     }
 //                     glEnd();
 
@@ -109,9 +108,9 @@ void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin);
 //                     glBegin(GL_POINTS);
 //                     glColor3f(0.0,0.0,0.0);
 
-//                     for(int i=0;i<points3.size();i++)
+//                     for(int i=0;i<allOfPoints.size();i++)
 // 					{
-//                         glVertex3f((double)points3[i].x,0,(double)points3[i].z);
+//                         glVertex3f((double)allOfPoints[i].x,0,(double)allOfPoints[i].z);
 //                     }
 //                     glEnd();      
 
@@ -119,9 +118,9 @@ void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin);
 //                     glBegin(GL_POINTS);
 //                     glColor3f(1.0,0.0,1.0);
 
-//                     for(int i=0;i<points4.rows;i++)
+//                     for(int i=0;i<fovPoints.rows;i++)
 // 					{
-//                         glVertex3f(points4.at<double>(i,0),0,points4.at<double>(i,2));
+//                         glVertex3f(fovPoints.at<double>(i,0),0,fovPoints.at<double>(i,2));
 //                     }
 //                     glEnd();            
 //                 }
@@ -169,10 +168,10 @@ namespace Viewer
             }
 
             // pts1: GT Pose, pts2: Pose, pts3: 3D Points, pts4: FOV of 3D Points
-            void draw_point(std::vector<cv::Point3f>& points1, std::vector<cv::Point3f>& points2, std::vector<cv::Point3d>& points3, cv::Mat points4)
+            void draw_point(std::vector<cv::Mat>& gtPose, std::vector<cv::Mat>& pose, std::vector<cv::Mat>& allOfPoints, cv::Mat fovPoints)
 			{
                 glClearColor(1.0f,1.0f,1.0f,1.0f);
-                if(points1.size()==0 || points2.size()==0)
+                if(gtPose.size()==0 || pose.size()==0)
 				{
                     return;
                 }
@@ -182,9 +181,9 @@ namespace Viewer
                     glBegin(GL_POINTS);
                     glColor3f(1.0,0.0,0.0);
 
-                    for(int i=0;i<points1.size();i++)
+                    for(int i=0;i<gtPose.size();i++)
 					{
-                        glVertex3f((float)points1[i].x,0,(float)points1[i].z);
+                        glVertex3f(gtPose[i].at<float>(0,0),0, gtPose[i].at<float>(2,0));
                     }
                     glEnd();
 
@@ -192,9 +191,9 @@ namespace Viewer
                     glBegin(GL_POINTS);
                     glColor3f(0.0,0.0,1.0);
 
-                    for(int i=0;i<points2.size();i++)
+                    for(int i=0;i<pose.size();i++)
 					{
-                        glVertex3f((float)points2[i].x,0,(float)points2[i].z);
+                        glVertex3f(gtPose[i].at<float>(0,0),0, gtPose[i].at<float>(2,0));
                     }
                     glEnd();
 
@@ -202,9 +201,10 @@ namespace Viewer
                     glBegin(GL_POINTS);
                     glColor3f(0.0,0.0,0.0);
 
-                    for(int i=0;i<points3.size();i++)
+                    for(int i = 0; i < allOfPoints.size(); i++)
 					{
-                        glVertex3f((double)points3[i].x,0,(double)points3[i].z);
+                        for(int j = 0; j < allOfPoints[i].cols; j++)
+                        glVertex3f(allOfPoints[i].at<float>(0,j), 0, allOfPoints[i].at<float>(2,j));
                     }
                     glEnd();      
 
@@ -212,9 +212,9 @@ namespace Viewer
                     glBegin(GL_POINTS);
                     glColor3f(1.0,0.0,1.0);
 
-                    for(int i=0;i<points4.rows;i++)
+                    for(int i = 0; i < fovPoints.cols; i++)
 					{
-                        glVertex3f(points4.at<double>(i,0),0,points4.at<double>(i,2));
+                        glVertex3f(fovPoints.at<double>(0,i), 0, fovPoints.at<double>(2,i));
                     }
                     glEnd();            
                 }
