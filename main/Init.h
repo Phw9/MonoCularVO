@@ -22,11 +22,11 @@
 #include <iostream>
 #include <fstream>
 
-//Intrinsic Matrix K
+
 
 void FileRead(std::deque<std::string>& v, std::ifstream &fin);
 void MakeTextFile(std::ofstream& fout, const int& imageNum);
-
+void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin);
 
 /*
     pangolin :: visualioze GT,RE Trajectory 
@@ -127,127 +127,7 @@ void MakeTextFile(std::ofstream& fout, const int& imageNum);
 //                 }
 //             }
 
-//             // src: img, point3d_world: , Kd: Intrinsic , Rt1: Extrinsic, currFeatures: 
-//             cv::Mat cv_draw_features(cv::Mat src, cv::Mat point3d_world, cv::Mat Kd, cv::Mat Rt1, std::vector<cv::Point2f>& currFeatures)
-// 			{
 
-//                 std::vector<cv::Point2f> homoFeatures;
-//                 for (int i = 0; i < point3d_world.rows; i++) 
-// 				{
-//                         cv::Mat homopoint = cv::Mat::eye(1, 4, CV_64FC1);
-//                         homopoint.at<double>(0, 3) = 1.0;
-//                         homopoint.at<double>(0, 0) = point3d_world.at<double>(i, 0);
-//                         homopoint.at<double>(0, 1) = point3d_world.at<double>(i, 1);
-//                         homopoint.at<double>(0, 2) = point3d_world.at<double>(i, 2);
-//                         cv::transpose(homopoint, homopoint);
-
-//                         cv::Mat triangulated_points = Kd * Rt1 * homopoint;
-//                         double temp = triangulated_points.at<double>(2, 0);
-//                         for (int j = 0; j < triangulated_points.rows; j++) 
-// 						{
-//                             triangulated_points.at<double>(j, 0) /= temp;
-//                         }
-//                         homoFeatures.emplace_back
-//                         (cv::Point2f(triangulated_points.at<double>(0, 0), triangulated_points.at<double>(1, 0)));
-//                 }
-//                 for (int i = 0; i < currFeatures.size(); i++)
-// 				{
-//                     //random color
-//                     int rgb[3];
-//                     rgb[0]=rand()%256;
-//                     rgb[1]=rand()%256;
-//                     rgb[2]=rand()%256;
-//                     cv::line(src,currFeatures[i],homoFeatures[i],cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);
-//                     cv::circle(src, currFeatures[i], 5, cv::Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //2d features  
-//                     // circle(src, homoFeatures[i], 6, Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //3d points
-//                     cv::rectangle(src, cv::Rect(cv::Point(homoFeatures[i].x-5,homoFeatures[i].y-5),
-//                     cv::Point(homoFeatures[i].x+5,homoFeatures[i].y+5)), cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);//projection 3d points
-//                 }
-//                 return src;    
-//             }
-
-//             // src: img, point3d_world:  , point3d_world1:  , Kd: Intrinsic, Rt1: Extrinsic, currFeatures:  , currFeatures1:
-//             cv::Mat cv_draw_features_1(cv::Mat src, cv::Mat point3d_world, cv::Mat point3d_world1, cv::Mat Kd, cv::Mat Rt1, std::vector<cv::Point2f>& currFeatures, std::vector<cv::Point2f>& currFeatures1)
-// 			{
-//                 std::vector<cv::Point2f> homoFeatures;
-//                 for (int i = 0; i < point3d_world.rows; i++) 
-// 				{
-//                         cv::Mat homopoint = cv::Mat::eye(1, 4, CV_64FC1);
-//                         homopoint.at<double>(0, 3) = 1.0;
-//                         homopoint.at<double>(0, 0) = point3d_world.at<double>(i, 0);
-//                         homopoint.at<double>(0, 1) = point3d_world.at<double>(i, 1);
-//                         homopoint.at<double>(0, 2) = point3d_world.at<double>(i, 2);
-//                         cv::transpose(homopoint, homopoint);
-
-//                         cv::Mat triangulated_points = Kd * Rt1 * homopoint;
-//                         double temp = triangulated_points.at<double>(2, 0);
-//                         for (int j = 0; j < triangulated_points.rows; j++) {
-//                             triangulated_points.at<double>(j, 0) /= temp;
-//                         }
-//                         homoFeatures.emplace_back
-//                         (cv::Point2f(triangulated_points.at<double>(0, 0), triangulated_points.at<double>(1, 0)));
-                    
-//                 }
-//                 for (int i = 0; i < currFeatures.size(); i++)
-// 				{
-//                     //random color
-//                     int rgb[3];
-//                     // rgb[0]=rand()%256;
-//                     // rgb[1]=rand()%256;
-//                     // rgb[2]=rand()%256;
-
-//                     rgb[0]=255;
-//                     rgb[1]=0;
-//                     rgb[2]=0;                   
-//                     cv::line(src, currFeatures[i], homoFeatures[i], cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);
-//                     cv::circle(src, currFeatures[i], 5, cv::Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //2d features  
-//                     // circle(src, homoFeatures[i], 6, cv::Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //3d points
-//                     cv::rectangle(src, cv::Rect(cv::Point(homoFeatures[i].x-5, homoFeatures[i].y-5),
-//                     cv::Point(homoFeatures[i].x+5, homoFeatures[i].y+5)), cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);//projection 3d points
-//                 }
-
-//                 std::vector<cv::Point2f> homofeatures1;
-//                 for (int i = 0; i < point3d_world1.rows; i++) 
-// 				{
-//                         cv::Mat homopoint = cv::Mat::eye(1, 4, CV_64FC1);
-//                         homopoint.at<double>(0, 3) = 1.0;
-//                         homopoint.at<double>(0, 0) = point3d_world1.at<double>(i, 0);
-//                         homopoint.at<double>(0, 1) = point3d_world1.at<double>(i, 1);
-//                         homopoint.at<double>(0, 2) = point3d_world1.at<double>(i, 2);
-//                         cv::transpose(homopoint, homopoint);
-
-//                         cv::Mat triangulated_points = Kd * Rt1 * homopoint;
-//                         double temp = triangulated_points.at<double>(2, 0);
-//                         for (int j = 0; j < triangulated_points.rows; j++) 
-// 						{
-//                             triangulated_points.at<double>(j, 0) /= temp;
-//                         }
-//                         homofeatures1.emplace_back
-//                         (cv::Point2f(triangulated_points.at<double>(0, 0), triangulated_points.at<double>(1, 0)));
-//                 }
-//                 for (int i = 0; i < currFeatures1.size(); i++) 
-// 				{
-//                     //random color
-//                     int rgb[3];
-//                     // rgb[0]=rand()%256;
-//                     // rgb[1]=rand()%256;
-//                     // rgb[2]=rand()%256;
-
-//                     rgb[0]=0;
-//                     rgb[1]=0;
-//                     rgb[2]=255;                   
-//                     cv::line(src,currFeatures1[i],homofeatures1[i], cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);
-//                     cv::circle(src, currFeatures1[i], 5, cv::Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //2d features  
-//                     // cv::circle(src, homoFeatures[i], 6, cv::Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //3d points
-//                     cv::rectangle(src,cv::Rect(cv::Point(homofeatures1[i].x-5,homofeatures1[i].y-5),
-//                     cv::Point(homofeatures1[i].x+5,homofeatures1[i].y+5)), cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);//projection 3d points
-//                 }
-
-
-//                 return src;    
-//             }
-//     };
-// }
 namespace Viewer
 {
     class my_visualize
@@ -288,7 +168,7 @@ namespace Viewer
                 d_cam.Activate(s_cam);
             }
 
-            // pts1, pts2, pts3, pts4
+            // pts1: GT Pose, pts2: Pose, pts3: 3D Points, pts4: FOV of 3D Points
             void draw_point(std::vector<cv::Point3f>& points1, std::vector<cv::Point3f>& points2, std::vector<cv::Point3d>& points3, cv::Mat points4)
 			{
                 glClearColor(1.0f,1.0f,1.0f,1.0f);
@@ -340,21 +220,21 @@ namespace Viewer
                 }
             }
 
-            // src: img, currFeatures: before, homoFeatures: after
-            cv::Mat cv_draw_features(cv::Mat src, std::vector<cv::Point2f>& currFeatures, std::vector<cv::Point2f> homoFeatures)
+            // circle is before, rectangle is after
+            cv::Mat cv_draw_features(cv::Mat src, std::vector<cv::Point2f>& beforePoints, std::vector<cv::Point2f> afterPoints)
 			{
-                for (int i = 0; i < currFeatures.size(); i++)
+                for (int i = 0; i < beforePoints.size(); i++)
 				{
                     //random color
                     int rgb[3];
                     rgb[0]=rand()%256;
                     rgb[1]=rand()%256;
                     rgb[2]=rand()%256;
-                    cv::line(src, currFeatures[i], homoFeatures[i],cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);
-                    cv::circle(src, currFeatures[i], 5, cv::Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //2d features  
-                    // circle(src, homoFeatures[i], 6, Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //3d points
-                    cv::rectangle(src, cv::Rect(cv::Point(homoFeatures[i].x-5,homoFeatures[i].y-5),
-                    cv::Point(homoFeatures[i].x+5,homoFeatures[i].y+5)), cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);//projection 3d points
+                    cv::line(src, beforePoints[i], afterPoints[i],cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);
+                    cv::circle(src, beforePoints[i], 5, cv::Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //2d features  
+                    // circle(src, afterPoints[i], 6, Scalar(rgb[0], rgb[1], rgb[2]), 1, 8, 0); //3d points
+                    cv::rectangle(src, cv::Rect(cv::Point(afterPoints[i].x-5,afterPoints[i].y-5),
+                    cv::Point(afterPoints[i].x+5,afterPoints[i].y+5)), cv::Scalar(rgb[0],rgb[1],rgb[2]),1,8,0);//projection 3d points
                 }
                 return src;    
             }

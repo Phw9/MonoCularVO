@@ -22,3 +22,27 @@ void MakeTextFile(std::ofstream& fout, const int& imageNum)
 		fout << ".png" << std::endl;
 	}
 }
+
+
+
+// void GTPoseRead(std::vector<cv::Mat> m, std::ifstream &fin)
+// {
+// 	char value[100];
+// 	cv::Mat temp(cv::Size(4,3), CV_64FC1, 0);
+// 	while(true)
+// 	{
+// 		for(int j = 0; j< temp.rows; j++)
+// 		{
+// 			for(int i = 0; i< temp.cols; i++)
+// 			{
+// 				fin.getline(value, 100, ' ');
+// 				double(fin);
+// 				std::cout << fin << std::endl;
+// 				temp.at<double>(j,i) = fin;
+// 			}
+// 		}
+// 		m.emplace_back(temp);
+// 		if(fin.eof()) break;
+		
+// 	}
+// }

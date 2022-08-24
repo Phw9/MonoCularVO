@@ -25,6 +25,8 @@
 #define VIEWPOINTY -10.0
 #define VIEWPOINTZ -0.1
 
+
+
 float cameraX = 6.018873000000e+02;
 float cameraY = 1.831104000000e+02;
 float focalLength = 7.070912000000e+02;
@@ -42,6 +44,9 @@ int main(int argc, char** argv)
 { 
 	std::ofstream rawData ("../main/image.txt", rawData.out | rawData.trunc);
 	std::ifstream read ("../main/image.txt", read.in);
+	std::ifstream gtPose ("../main/GTpose.txt", gtPose.in);
+	
+	std::vector<cv::Mat> GTPose;
 
 	if(!read.is_open())
 	{
@@ -50,10 +55,12 @@ int main(int argc, char** argv)
 	}
 	std::deque<std::string> readImageName;
 	int imageCurNum = 0;
-	argc = 921;
+	argc = 4540;
 	
 	MakeTextFile(rawData, argc);
 	FileRead(readImageName, read);
+	// GTPoseRead(GTPose, gtPose);
+
 
 	mvo::FeatureDetect desc1;
 	// mvo::FeatureDetect desc2;
@@ -63,11 +70,13 @@ int main(int argc, char** argv)
 	mvo::Triangulate tri;
 
 	//Triangulate Points
-	cv::Mat positions4D;
+	cv::Mat positions3D;
 	double initialData[] = {0,0,0,1};
 	std::vector<cv::Mat> global4DPositions;
+	std::vector<cv::Mat> global4DGTPositions;
 	int gHP = 0;
 	global4DPositions.emplace_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
+	global4DGTPositions.emplace_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
 	gHP++;
 
 	mvo::LocalPoints localPoints;
@@ -79,6 +88,7 @@ int main(int argc, char** argv)
 
 	std::vector<mvo::CalcMatrix> globalPose;
 	int gP = 0;
+
 
 	Viewer::my_visualize pangolinViewer=Viewer::my_visualize(WINDOWWIDTH, WINDOWHEIGHT);
     pangolinViewer.initialize();
@@ -147,9 +157,12 @@ int main(int argc, char** argv)
 			gP++;
 			std::cout << globalPose[gP-1].mCombineRt << std::endl;
 			
-			positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-			global4DPositions.emplace_back(std::move(positions4D));
+			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+			global4DPositions.emplace_back(std::move(positions3D));
+			// positions3D = mvo::GetPosePosition(GTPose[gP-1], global4DPositions[gHP-1]);
+			// global4DGTPositions.emplace_back(std::move(positions3D));
 			gHP++;
+
 			// if(!desc2.ConerFAST(img))
 			// {
 			// 	std::cerr << "imageCurNum 3" << std::endl;
@@ -197,8 +210,10 @@ int main(int argc, char** argv)
 			gP++;
 			std::cout << globalPose[gP-1].mCombineRt << std::endl;
 			
-			positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-			global4DPositions.emplace_back(std::move(positions4D));
+			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+			global4DPositions.emplace_back(std::move(positions3D));
+			// positions3D = mvo::GetPosePosition(GTPose[gP-1], global4DPositions[gHP-1]);
+			// global4DGTPositions.emplace_back(std::move(positions3D));
 			gHP++;
 
 			// if(!desc1.ConerFAST(img))
@@ -250,8 +265,10 @@ int main(int argc, char** argv)
 					gP++;
 					std::cout << globalPose[gP-1].mCombineRt << std::endl;
 					
-					positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-					global4DPositions.emplace_back(std::move(positions4D));
+					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+					global4DPositions.emplace_back(std::move(positions3D));
+					// positions3D = mvo::GetPosePosition(GTPose[gP-1], global4DPositions[gHP-1]);
+					// global4DGTPositions.emplace_back(std::move(positions3D));
 					gHP++;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker2.mfeatures, tracker1.mfeatures))
@@ -330,8 +347,10 @@ int main(int argc, char** argv)
 					gP++;
 					std::cout << globalPose[gP-1].mCombineRt << std::endl;
 
-					positions4D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-					global4DPositions.emplace_back(std::move(positions4D));
+					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
+					global4DPositions.emplace_back(std::move(positions3D));
+					// positions3D = mvo::GetPosePosition(GTPose[gP-1], global4DPositions[gHP-1]);
+					// global4DGTPositions.emplace_back(std::move(positions3D));
 					gHP++;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker1.mfeatures, tracker2.mfeatures))
@@ -375,6 +394,7 @@ int main(int argc, char** argv)
 			}
 		
 		} //if
+		// pangolinViewer.draw_point(Pango_REpose, Pango_GTpose, hello, Pango_Map);
 
 		cv::imshow("img",img);
 	
@@ -383,7 +403,6 @@ int main(int argc, char** argv)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     d_cam.Activate(s_cam);
     // std::vector<cv::Point3d> hello=land_mark.Getvector();
-    // pangolinViewer.draw_point(Pango_REpose, Pango_GTpose, hello, Pango_Map);
     // pangolin::FinishFrame();
 
 	std::cout << "globalMapPoints size: " << globalMapPoints.size() << std::endl;
