@@ -15,8 +15,8 @@ namespace mvo
                     cv::OutputArray tvec);
 
     public:
-    cv::Mat rvec;
-    cv::Mat tvec;
+    cv::Vec3f rvec;
+    cv::Vec3f tvec;
 
     };
 }

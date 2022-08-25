@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 	int imageCurNum = 0;
 	argc = 4540;
 	
-	std::vector<cv::Mat> GTPose;
+	std::vector<cv::Vec3f> GTPose;
 	int GTP = 0;
 	
 	MakeTextFile(rawData, argc);
@@ -76,13 +76,12 @@ int main(int argc, char** argv)
 
 	//Triangulate Points
 	cv::Mat positions3D;
-	cv::Mat gtPositions3D;
 	double initialData[] = {0,0,0,1};
-	std::vector<cv::Mat> global4DPositions;
-	std::vector<cv::Mat> global4DGTPositions;
+	std::vector<cv::Mat> globalMyPositions;
+	std::vector<cv::Vec3f> globalGTPositions;
 	int gHP = 0;
-	global4DPositions.emplace_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
-	global4DGTPositions.emplace_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
+	globalMyPositions.emplace_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
+	globalGTPositions.emplace_back(cv::Mat(cv::Size(1,4), CV_64FC1, initialData));
 	gHP++;
 
 	std::vector<cv::Mat> globalMapPoints;	//(4xN)
@@ -146,18 +145,17 @@ int main(int argc, char** argv)
 			gP++;
 			std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
 
-			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-			global4DPositions.emplace_back(std::move(positions3D));
+			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, globalMyPositions[gHP-1]);
+			globalMyPositions.emplace_back(std::move(positions3D));
 			gHP++;
 			for(int i = 0; i < 12; i++)
 			{
-				gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
-				global4DGTPositions.emplace_back(std::move(gtPositions3D));
+				globalGTPositions.emplace_back(std::move(GTPose[GTP+i]));
 			}
 			GTP += 12;
 
 			std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
-			std::cout << "global4DGTPositions"<< GTP-1 << "th: " << global4DGTPositions[GTP-1]<< std::endl;
+			std::cout << "globalGTPositions"<< GTP-1 << "th: " << globalGTPositions[GTP-1]<< std::endl;
 		}
 		else if(imageCurNum == 4){}
 		else if(imageCurNum == 5)
@@ -180,21 +178,20 @@ int main(int argc, char** argv)
 			
 			std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
 			
-			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-			global4DPositions.emplace_back(std::move(positions3D));
+			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, globalMyPositions[gHP-1]);
+			globalMyPositions.emplace_back(std::move(positions3D));
 			gHP++;
 			
-			std::cout << "global4DPositions" << gHP-1 << ": " << global4DPositions[gHP-1] << std::endl;
+			std::cout << "globalMyPositions" << gHP-1 << ": " << globalMyPositions[gHP-1] << std::endl;
 			
 			for(int i = 0; i < 12; i++)
 			{
-				gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
-				global4DGTPositions.emplace_back(std::move(gtPositions3D));
+				globalGTPositions.emplace_back(std::move(GTPose[GTP+i]));
 			}
 			GTP += 12;
 			
 			std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
-			std::cout << "global4DGTPositions"<< GTP-1 << "th: " << global4DGTPositions[GTP-1]<< std::endl;
+			std::cout << "globalGTPositions"<< GTP-1 << "th: " << globalGTPositions[GTP-1]<< std::endl;
 		}
 			
 		else
@@ -221,21 +218,20 @@ int main(int argc, char** argv)
 
 					std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
 					
-					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-					global4DPositions.emplace_back(std::move(positions3D));
+					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, globalMyPositions[gHP-1]);
+					globalMyPositions.emplace_back(std::move(positions3D));
 					gHP++;
 
-					std::cout << "size of global4DPositions" << gHP-1 << ": " << global4DPositions[gHP-1].size() << std::endl;
+					std::cout << "size of globalMyPositions" << gHP-1 << ": " << globalMyPositions[gHP-1].size() << std::endl;
 
 					for(int i = 0; i < 12; i++)
 					{
-						gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
-						global4DGTPositions.emplace_back(std::move(gtPositions3D));
+						globalGTPositions.emplace_back(std::move(GTPose[GTP+i]));
 					}
 					GTP += 12;
 					
 					std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
-					std::cout << "global4DGTPositions"<< GTP-1 << "th: " << global4DGTPositions[GTP-1]<< std::endl;
+					std::cout << "globalGTPositions"<< GTP-1 << "th: " << globalGTPositions[GTP-1]<< std::endl;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker2.mfeatures, tracker1.mfeatures))
 					{
@@ -296,20 +292,20 @@ int main(int argc, char** argv)
 
 					std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
 
-					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
-					global4DPositions.emplace_back(std::move(positions3D));
+					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, globalMyPositions[gHP-1]);
+					globalMyPositions.emplace_back(std::move(positions3D));
 					gHP++;
 
-					std::cout << "global4DPositions" << gHP-1 << ": " << global4DPositions[gHP-1] << std::endl;
+					std::cout << "globalMyPositions" << gHP-1 << ": " << globalMyPositions[gHP-1] << std::endl;
 
 					for(int i = 0; i < 12; i++)
 					{
-						gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
-						global4DGTPositions.emplace_back(std::move(gtPositions3D));
+						globalGTPositions.emplace_back(std::move(GTPose[GTP+i]));
 					}
 					GTP += 12;
+
 					std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
-					std::cout << "global4DGTPositions"<< GTP-1 << ": " << global4DGTPositions[GTP-1]<< std::endl;
+					std::cout << "globalGTPositions"<< GTP-1 << ": " << globalGTPositions[GTP-1]<< std::endl;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker1.mfeatures, tracker2.mfeatures))
 					{
@@ -354,13 +350,13 @@ int main(int argc, char** argv)
 			}
 		
 		} //if
-		// std::cout << global4DGTPositions[0] << std::endl;
-		// std::cout << global4DPositions[0] << std::endl;
+		// std::cout << globalGTPositions[0] << std::endl;
+		// std::cout << globalMyPositions[0] << std::endl;
 		// std::cout << globalMapPoints[0] << std::endl;
 		// std::cout << tri.[0] << std::endl;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		d_cam.Activate(s_cam);
-		pangolinViewer.draw_point(global4DPositions, global4DGTPositions, globalMapPoints, tri.mworldMapPoints);
+		pangolinViewer.draw_point(globalMyPositions, globalGTPositions, globalMapPoints, tri.mworldMapPoints);
 
     	pangolin::FinishFrame();
 		cv::imshow("img",img);
@@ -370,9 +366,9 @@ int main(int argc, char** argv)
 
 	std::cout << "globalMapPoints size: " << globalMapPoints.size() << std::endl;
 	std::cout << "globalPose size: " << globalPose.size() <<std::endl;	//367
-	std::cout << "global4DPositions size: " << global4DPositions.size() <<std::endl;
+	std::cout << "globalMyPositions size: " << globalMyPositions.size() <<std::endl;
 	std::cout << "GTPose size: " << GTPose.size() << std::endl;
-	std::cout << "global4DGTPositions size: " << global4DGTPositions.size() <<std::endl;
+	std::cout << "globalGTPositions size: " << globalGTPositions.size() <<std::endl;
 	cv::destroyAllWindows();
 	
 

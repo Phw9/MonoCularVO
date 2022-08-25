@@ -25,7 +25,7 @@
 
 void FileRead(std::deque<std::string>& v, std::ifstream &fin);
 void MakeTextFile(std::ofstream& fout, const int& imageNum);
-void GTPoseRead(std::vector<cv::Mat>& m, std::ifstream& fin);
+void GTPoseRead(std::vector<cv::Vec3f>& v, std::ifstream& fin);
 
 
 namespace Viewer
@@ -45,7 +45,7 @@ namespace Viewer
             void active_cam();
 
             // pts1: GT Pose, pts2: Pose, pts3: 3D Points, pts4: FOV of 3D Points
-            void draw_point(std::vector<cv::Mat>& gtPose, std::vector<cv::Mat>& pose, std::vector<cv::Mat>& allOfPoints, cv::Mat fovPoints);
+            void draw_point(std::vector<cv::Mat>& pose, std::vector<cv::Vec3f>& gtPose, std::vector<cv::Mat>& allOfPoints, cv::Mat fovPoints);
 
             // circle is before, rectangle is after
             cv::Mat cv_draw_features(cv::Mat src, std::vector<cv::Point2f>& beforePoints, std::vector<cv::Point2f> afterPoints);
