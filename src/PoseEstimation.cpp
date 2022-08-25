@@ -12,7 +12,7 @@ bool mvo::PoseEstimation::solvePnP(const std::vector<cv::Point3f>& objectPoints,
                     cv::OutputArray rvec,
                     cv::OutputArray tvec)
 {
-    if(!cv::solvePnP(objectPoints, imagePoints, cameraIntrinsic,cv::Mat(), rvec, tvec))
+    if(!cv::solvePnPRansac(objectPoints, imagePoints, cameraIntrinsic,cv::Mat(), rvec, tvec))
     {
         std::cerr <<"Can't solve PnP" << std::endl;
     }

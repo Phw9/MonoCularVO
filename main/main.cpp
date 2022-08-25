@@ -20,9 +20,9 @@
 
 #define WINDOWWIDTH 1024
 #define WINDOWHEIGHT 768
-#define VIEWPOINTF 2000.0
+#define VIEWPOINTF 20.0
 #define VIEWPOINTX 0.0
-#define VIEWPOINTY -10.0
+#define VIEWPOINTY -100.0
 #define VIEWPOINTZ -0.1
 
 
@@ -67,8 +67,8 @@ int main(int argc, char** argv)
 
 
 
-	mvo::FeatureDetect desc1;
-	// mvo::FeatureDetect desc2;
+	mvo::FeatureDetect sfm;
+	mvo::FeatureDetect fastCorner;
 	mvo::FeatureTracking tracker1;
 	mvo::FeatureTracking tracker2;
 	mvo::CalcMatrix calcM;
@@ -113,39 +113,39 @@ int main(int argc, char** argv)
 
 		if (imageCurNum==1)
 		{
-			if(!desc1.GoodFeatureToTrack(img))
+			if(!sfm.GoodFeatureToTrack(img))
 			{
 				std::cerr << "imageCurNum 1" << std::endl;
 			}
 			else
 			{
-				std::cout << "GFTT size : " << desc1.mfeatures.size() << std::endl;
+				std::cout << "GFTT size : " << sfm.mfeatures.size() << std::endl;
 			}
 
 			cv::cvtColor(img, img, cv::ColorConversionCodes::COLOR_GRAY2BGR);
-			img = pangolinViewer.cv_draw_features(img, desc1.mfeatures, desc1.mfeatures);
+			img = pangolinViewer.cv_draw_features(img, sfm.mfeatures, sfm.mfeatures);
 			
 		}
 		else if(imageCurNum == 2){}
 		else if(imageCurNum == 3)
 		{
-			tracker1.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, desc1.mfeatures);
+			tracker1.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, sfm.mfeatures);
 			std::cout <<"after tracked size: "<< tracker1.mfeatures.size() << std::endl;
-			std::cout <<"after tracking size: "<< desc1.mfeatures.size() << std::endl;
+			std::cout <<"after tracking size: "<< sfm.mfeatures.size() << std::endl;
 			
 			cv::cvtColor(img, img, cv::ColorConversionCodes::COLOR_GRAY2BGR);
-			img = pangolinViewer.cv_draw_features(img,tracker1.mfeatures, desc1.mfeatures);
+			img = pangolinViewer.cv_draw_features(img,tracker1.mfeatures, sfm.mfeatures);
 
-			if(!calcM.CreateEssentialMatrix(desc1.mfeatures, tracker1.mfeatures, intrinsicK))
+			if(!calcM.CreateEssentialMatrix(sfm.mfeatures, tracker1.mfeatures, intrinsicK))
 			{
 				std::cerr << "imageCurNum 3" << std::endl;
 			}
-			calcM.GetEssentialRt(calcM.mEssential, intrinsicK, desc1.mfeatures, tracker1.mfeatures);
+			calcM.GetEssentialRt(calcM.mEssential, intrinsicK, sfm.mfeatures, tracker1.mfeatures);
 			calcM.CombineRt();
 			globalPose.emplace_back(std::move(calcM));
 			gP++;
-			std::cout << globalPose[gP-1].mCombineRt << std::endl;
-			
+			std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
+
 			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
 			global4DPositions.emplace_back(std::move(positions3D));
 			gHP++;
@@ -154,7 +154,10 @@ int main(int argc, char** argv)
 				gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
 				global4DGTPositions.emplace_back(std::move(gtPositions3D));
 			}
-			GTP += 12;			
+			GTP += 12;
+
+			std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
+			std::cout << "global4DGTPositions"<< GTP-1 << "th: " << global4DGTPositions[GTP-1]<< std::endl;
 		}
 		else if(imageCurNum == 4){}
 		else if(imageCurNum == 5)
@@ -175,17 +178,24 @@ int main(int argc, char** argv)
 			calcM.CombineRt();
 			globalPose.emplace_back(std::move(calcM));
 			gP++;
-			std::cout << globalPose[gP-1].mCombineRt << std::endl;
+			
+			std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
 			
 			positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
 			global4DPositions.emplace_back(std::move(positions3D));
 			gHP++;
+			
+			std::cout << "global4DPositions" << gHP-1 << ": " << global4DPositions[gHP-1] << std::endl;
+			
 			for(int i = 0; i < 12; i++)
 			{
 				gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
 				global4DGTPositions.emplace_back(std::move(gtPositions3D));
 			}
 			GTP += 12;
+			
+			std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
+			std::cout << "global4DGTPositions"<< GTP-1 << "th: " << global4DGTPositions[GTP-1]<< std::endl;
 		}
 			
 		else
@@ -209,31 +219,43 @@ int main(int argc, char** argv)
 					calcM.CombineRt();
 					globalPose.emplace_back(std::move(calcM));
 					gP++;
-					std::cout << globalPose[gP-1].mCombineRt << std::endl;
+
+					std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
 					
 					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
 					global4DPositions.emplace_back(std::move(positions3D));
 					gHP++;
+
+					std::cout << "size of global4DPositions" << gHP-1 << ": " << global4DPositions[gHP-1].size() << std::endl;
+
 					for(int i = 0; i < 12; i++)
 					{
 						gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
 						global4DGTPositions.emplace_back(std::move(gtPositions3D));
 					}
 					GTP += 12;
+					
+					std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
+					std::cout << "global4DGTPositions"<< GTP-1 << "th: " << global4DGTPositions[GTP-1]<< std::endl;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker2.mfeatures, tracker1.mfeatures))
 					{
 						std::cerr << "failed to calculate triangulatePoints" << std::endl;
 					}
-					std::cout << "after triangulate Point size: " <<tri.mworldMapPoints.size() << std::endl;
+
+					std::cout << "after triangulate Point size: " << tri.mworldMapPoints.size() << std::endl;
+					// std::cout << "after triangulate Points: " << tri.mworldMapPoints << std::endl;
+
 					if(!tri.ScalingPoints())
 					{
 						std::cerr << "failed to Scale Points" << std::endl;
 					}
 					globalMapPoints.emplace_back(tri.mworldMapPoints);
 					gMP++;
+					
 					std::cout << "check to insert global size: " << globalMapPoints.size() << std::endl;
-					std::cout << "check to insert local size: " << globalMapPoints[gMP-1].size() << std::endl;
+					std::cout << "MapPoints at the Moment by global: " << globalMapPoints[gMP-1].size() << std::endl;
+					std::cout << "MapPoints at the Moment by tri.mworldMapPoints: " << tri.mworldMapPoints.size() << std::endl;
 
 					break;
 					
@@ -242,14 +264,14 @@ int main(int argc, char** argv)
 				{
 					if(tracker1.mfeatures.size() < minOfTrackPoints)
 					{
-						if(!desc1.GoodFeatureToTrack(img))
+						if(!sfm.GoodFeatureToTrack(img))
 						{
 							std::cerr << "imageCurNum " << imageCurNum << std::endl;
 						}
 						else
 						{
-							tracker1.mfeatures = std::move(desc1.mfeatures);
-							std::cout << "new GFTT size: " << desc1.mfeatures.size() << std::endl;
+							tracker1.mfeatures = std::move(sfm.mfeatures);
+							std::cout << "new GFTT size: " << sfm.mfeatures.size() << std::endl;
 							std::cout << "move to new GFTT size: " << tracker1.mfeatures.size() << std::endl;
 						}
 					}
@@ -272,17 +294,23 @@ int main(int argc, char** argv)
 					calcM.CombineRt();
 					globalPose.emplace_back(std::move(calcM));
 					gP++;
-					std::cout << globalPose[gP-1].mCombineRt << std::endl;
+
+					std::cout << "globalPose" << gP-1 << ": " << globalPose[gP-1].mCombineRt << std::endl;
 
 					positions3D = mvo::GetPosePosition(globalPose[gP-1].mCombineRt, global4DPositions[gHP-1]);
 					global4DPositions.emplace_back(std::move(positions3D));
 					gHP++;
+
+					std::cout << "global4DPositions" << gHP-1 << ": " << global4DPositions[gHP-1] << std::endl;
+
 					for(int i = 0; i < 12; i++)
 					{
 						gtPositions3D = mvo::GetPosePosition(GTPose[GTP+i], global4DGTPositions[GTP+i]);
 						global4DGTPositions.emplace_back(std::move(gtPositions3D));
 					}
 					GTP += 12;
+					std::cout << "globalGTPose" << GTP-1 << ": " << GTPose[GTP-1] << std::endl;
+					std::cout << "global4DGTPositions"<< GTP-1 << ": " << global4DGTPositions[GTP-1]<< std::endl;
 
 					if(!tri.CalcWorldPoints(globalPose[gP-2].mCombineRt, globalPose[gP-1].mCombineRt, tracker1.mfeatures, tracker2.mfeatures))
 					{
@@ -294,8 +322,10 @@ int main(int argc, char** argv)
 					}
 					globalMapPoints.emplace_back(tri.mworldMapPoints);
 					gMP++;
+					
 					std::cout << "check to insert global size: " << globalMapPoints.size() << std::endl;
-					std::cout << "check to insert local size: " << globalMapPoints[gMP-1].size() << std::endl;
+					std::cout << "MapPoints at the Moment by global: " << globalMapPoints[gMP-1].size() << std::endl;
+					std::cout << "MapPoints at the Moment by tri.mworldMapPoints: " << tri.mworldMapPoints.size() << std::endl;
 
 
 					break;
@@ -305,14 +335,14 @@ int main(int argc, char** argv)
 				{
 					if(tracker2.mfeatures.size() < minOfTrackPoints)
 					{
-						if(!desc1.GoodFeatureToTrack(img))
+						if(!sfm.GoodFeatureToTrack(img))
 						{
 							std::cerr << "imageCurNum " << imageCurNum << std::endl;
 						}
 						else
 						{
-							tracker2.mfeatures = std::move(desc1.mfeatures);
-							std::cout << "new GFTT size: " << desc1.mfeatures.size() << std::endl;
+							tracker2.mfeatures = std::move(sfm.mfeatures);
+							std::cout << "new GFTT size: " << sfm.mfeatures.size() << std::endl;
 							std::cout << "move to new GFTT size: " << tracker2.mfeatures.size() << std::endl;
 						}
 					}
@@ -325,14 +355,18 @@ int main(int argc, char** argv)
 			}
 		
 		} //if
+		// std::cout << global4DGTPositions[0] << std::endl;
+		// std::cout << global4DPositions[0] << std::endl;
+		// std::cout << globalMapPoints[0] << std::endl;
+		// std::cout << tri.[0] << std::endl;
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		d_cam.Activate(s_cam);
+		pangolinViewer.draw_point(global4DPositions, global4DGTPositions, globalMapPoints, tri.mworldMapPoints);
 
-		// pangolinViewer.draw_point(global4DPositions, global4DGTPositions, globalMapPoints, tri.mworldMapPoints);
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// d_cam.Activate(s_cam);
-    	// pangolin::FinishFrame();
+    	pangolin::FinishFrame();
 		cv::imshow("img",img);
 	
-		if(cv::waitKey(90) == 27) break;	//ESC key	
+		if(cv::waitKey(5) == 27) break;	//ESC key	
 	}
 
 	std::cout << "globalMapPoints size: " << globalMapPoints.size() << std::endl;
