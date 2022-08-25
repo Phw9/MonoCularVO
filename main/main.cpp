@@ -27,9 +27,9 @@
 
 
 
-float cameraX = 6.018873000000e+02;
-float cameraY = 1.831104000000e+02;
-float focalLength = 7.070912000000e+02;
+float cameraX = 6.071928000000e+02;
+float cameraY = 1.852157000000e+02;
+float focalLength = 7.188560000000e+02;
 float data[] = {focalLength, 0, cameraX,
                 0, focalLength, cameraY,
                 0, 0, 1};				
@@ -162,7 +162,6 @@ int main(int argc, char** argv)
 		else if(imageCurNum == 4){}
 		else if(imageCurNum == 5)
 		{
-
 			tracker2.OpticalFlowPyrLK(cv::imread(readImageName.at(imageCurNum-2), cv::ImreadModes::IMREAD_UNCHANGED), img, tracker1.mfeatures);
 			std::cout << "after tracked size: "<<tracker2.mfeatures.size() << std::endl;
 			std::cout << "after tracking size: "<<tracker1.mfeatures.size() << std::endl;
